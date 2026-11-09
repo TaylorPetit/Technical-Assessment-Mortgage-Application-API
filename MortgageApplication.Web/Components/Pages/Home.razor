@@ -53,7 +53,7 @@
                         <span class="input-wrap"><span>$</span><InputNumber @bind-Value="Request.PropertyValue" step="any" /></span>
                     </label>
                     <label class="term-field">Mortgage term
-                        <span class="input-wrap"><InputNumber @bind-Value="Request.TermYears" step="1" /><span>years</span></span>
+                        <span class="input-wrap"><InputNumber @bind-Value="Request.TermYears" min="1" step="1" /><span>years</span></span>
                     </label>
                 </div>
                 <button class="button button-primary" type="submit" disabled="@IsBusy">
