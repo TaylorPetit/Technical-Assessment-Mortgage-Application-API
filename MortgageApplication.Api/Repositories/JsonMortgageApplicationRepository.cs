@@ -1,7 +1,7 @@
 using System.Text.Json;
-using WebApplication1.Models;
+using MortgageApplicationApi.Models;
 
-namespace WebApplication1.Repositories;
+namespace MortgageApplicationApi.Repositories;
 
 /// <summary>
 /// Small file-backed store for this single-instance exercise implementation.

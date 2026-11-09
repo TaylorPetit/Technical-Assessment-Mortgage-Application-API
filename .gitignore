@@ -2,7 +2,7 @@
 **/bin/
 **/obj/
 **/TestResults/
-WebApplication1/App_Data/
+MortgageApplication.Api/App_Data/
 .vscode/
 .idea/
 *.user

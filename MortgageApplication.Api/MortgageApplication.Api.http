@@ -1,0 +1,24 @@
+@MortgageApplicationApi_HostAddress = https://localhost:7133
+
+POST {{MortgageApplicationApi_HostAddress}}/api/mortgage-applications
+Content-Type: application/json
+
+{
+  "annualIncome": 100000,
+  "monthlyExpenses": 1200,
+  "depositAmount": 100000,
+  "propertyValue": 400000,
+  "termYears": 25
+}
+
+###
+
+@applicationId = REPLACE_WITH_ID_FROM_POST_RESPONSE
+
+GET {{MortgageApplicationApi_HostAddress}}/api/mortgage-applications/{{applicationId}}
+Accept: application/json
+
+###
+
+GET {{MortgageApplicationApi_HostAddress}}/api/mortgage-applications/{{applicationId}}/affordability
+Accept: application/json

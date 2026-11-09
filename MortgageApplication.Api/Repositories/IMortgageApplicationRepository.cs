@@ -1,6 +1,6 @@
-using WebApplication1.Models;
+using MortgageApplicationApi.Models;
 
-namespace WebApplication1.Repositories;
+namespace MortgageApplicationApi.Repositories;
 
 public interface IMortgageApplicationRepository
 {

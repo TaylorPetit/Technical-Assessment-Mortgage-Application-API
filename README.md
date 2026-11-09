@@ -11,12 +11,12 @@ A small ASP.NET Core 10 JSON API for submitting mortgage applications, retrievin
 From the repository root:
 
 ```powershell
-dotnet run --project .\WebApplication1\WebApplication1.csproj
+dotnet run --project .\MortgageApplication.Api\MortgageApplication.Api.csproj
 ```
 
-The HTTPS launch profile listens at `https://localhost:7133` and `http://localhost:5251`. OpenAPI is available in Development at `/openapi/v1.json`.
+The HTTPS launch profile listens at `https://localhost:7133` and `http://localhost:5251`.
 
-The application stores submitted applications in `WebApplication1/App_Data/mortgage-applications.json`. This file is created on first submission and is excluded from Git.
+The application stores submitted applications in `MortgageApplication.Api/App_Data/mortgage-applications.json`. This file is created on first submission and is excluded from Git.
 
 ## API
 
@@ -48,14 +48,14 @@ Returns `200 OK` or `404 Not Found`.
 
 Returns `200 OK` with LTV, DTI, approval decision, maximum borrowing estimate, and an explanation. Returns `404 Not Found` when the application does not exist.
 
-The `WebApplication1.http` file contains example requests that can be run from Visual Studio.
+The `MortgageApplication.Api.http` file contains example requests that can be run from Visual Studio.
 
 ## Customer console client
 
 The small interactive console client exercises the same create, retrieve, and affordability endpoints as an API customer. Start the API in one terminal:
 
 ```powershell
-dotnet run --project .\WebApplication1\WebApplication1.csproj --launch-profile http
+dotnet run --project .\MortgageApplication.Api\MortgageApplication.Api.csproj --launch-profile http
 ```
 
 Then start the client in another terminal:

@@ -1,4 +1,4 @@
-namespace WebApplication1.Models;
+namespace MortgageApplicationApi.Models;
 
 public record AffordabilityAssessment(
     Guid ApplicationId,

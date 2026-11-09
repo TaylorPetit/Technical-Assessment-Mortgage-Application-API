@@ -1,6 +1,6 @@
-using WebApplication1.Models;
-using WebApplication1.Services;
-using MortgageApplicationModel = WebApplication1.Models.MortgageApplication;
+using MortgageApplicationApi.Models;
+using MortgageApplicationApi.Services;
+using MortgageApplicationModel = MortgageApplicationApi.Models.MortgageApplication;
 
 namespace MortgageApplication.Tests;
 

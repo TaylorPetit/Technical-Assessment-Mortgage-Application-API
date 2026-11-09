@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace WebApplication1.Models;
+namespace MortgageApplicationApi.Models;
 
 public class CreateMortgageApplicationRequest : IValidatableObject
 {

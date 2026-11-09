@@ -1,5 +1,5 @@
-using WebApplication1.Repositories;
-using WebApplication1.Services;
+using MortgageApplicationApi.Repositories;
+using MortgageApplicationApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

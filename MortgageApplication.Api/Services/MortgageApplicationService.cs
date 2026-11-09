@@ -1,7 +1,7 @@
-using WebApplication1.Models;
-using WebApplication1.Repositories;
+using MortgageApplicationApi.Models;
+using MortgageApplicationApi.Repositories;
 
-namespace WebApplication1.Services;
+namespace MortgageApplicationApi.Services;
 
 public class MortgageApplicationService(
     IMortgageApplicationRepository repository,

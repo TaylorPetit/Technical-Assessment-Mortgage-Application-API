@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using WebApplication1.Models;
-using WebApplication1.Services;
+using MortgageApplicationApi.Models;
+using MortgageApplicationApi.Services;
 
-namespace WebApplication1.Controllers;
+namespace MortgageApplicationApi.Controllers;
 
 [ApiController]
 [Route("api/mortgage-applications")]

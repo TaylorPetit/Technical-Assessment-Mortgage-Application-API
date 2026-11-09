@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using WebApplication1.Models;
+using MortgageApplicationApi.Models;
 
 namespace MortgageApplication.Tests;
 

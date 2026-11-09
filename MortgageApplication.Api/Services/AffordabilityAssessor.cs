@@ -1,6 +1,6 @@
-using WebApplication1.Models;
+using MortgageApplicationApi.Models;
 
-namespace WebApplication1.Services;
+namespace MortgageApplicationApi.Services;
 
 /// <summary>
 /// Provides a deliberately simplified affordability estimate for the exercise.
