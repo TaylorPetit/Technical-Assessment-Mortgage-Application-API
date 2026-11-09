@@ -2,9 +2,6 @@ using MortgageApplicationApi.Models;
 
 namespace MortgageApplicationApi.Services;
 
-/// <summary>
-/// Provides a deliberately simplified affordability estimate for the exercise.
-/// </summary>
 public class AffordabilityAssessor
 {
     public const decimal AnnualInterestRate = 0.05m;
