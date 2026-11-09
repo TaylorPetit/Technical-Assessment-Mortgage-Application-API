@@ -50,6 +50,22 @@ Returns `200 OK` with LTV, DTI, approval decision, maximum borrowing estimate, a
 
 The `WebApplication1.http` file contains example requests that can be run from Visual Studio.
 
+## Customer console client
+
+The small interactive console client exercises the same create, retrieve, and affordability endpoints as an API customer. Start the API in one terminal:
+
+```powershell
+dotnet run --project .\WebApplication1\WebApplication1.csproj --launch-profile http
+```
+
+Then start the client in another terminal:
+
+```powershell
+dotnet run --project .\console\MortgageApplication.Client\MortgageApplication.Client.csproj
+```
+
+The client defaults to `http://localhost:5251`; enter a different base URL when prompted if the API is hosted elsewhere.
+
 ## Affordability assumptions
 
 The assessment is illustrative and is not a lending decision. It assumes:
