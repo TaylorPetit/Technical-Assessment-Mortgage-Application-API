@@ -33,7 +33,7 @@
     <div class="content-grid">
         <section class="card application-card" aria-labelledby="application-heading">
             <div class="section-heading">
-                <div><h2 id="application-heading">Your details</h2><p>All amounts are in Canadian dollars.</p></div>
+                <div><h2 id="application-heading">Your details</h2></div>
             </div>
 
             <EditForm Model="Request" FormName="CreateMortgageApplication"
@@ -41,16 +41,16 @@
                 <DataAnnotationsValidator />
                 <div class="form-grid">
                     <label>Gross annual income
-                        <span class="input-wrap"><span>$</span><InputNumber @bind-Value="Request.AnnualIncome" step="any" /></span>
+                        <span class="input-wrap"><span>£</span><InputNumber @bind-Value="Request.AnnualIncome" step="any" /></span>
                     </label>
                     <label>Existing monthly expenses
-                        <span class="input-wrap"><span>$</span><InputNumber @bind-Value="Request.MonthlyExpenses" step="any" /></span>
+                        <span class="input-wrap"><span>£</span><InputNumber @bind-Value="Request.MonthlyExpenses" step="any" /></span>
                     </label>
                     <label>Deposit
-                        <span class="input-wrap"><span>$</span><InputNumber @bind-Value="Request.DepositAmount" step="any" /></span>
+                        <span class="input-wrap"><span>£</span><InputNumber @bind-Value="Request.DepositAmount" step="any" /></span>
                     </label>
                     <label>Property value
-                        <span class="input-wrap"><span>$</span><InputNumber @bind-Value="Request.PropertyValue" step="any" /></span>
+                        <span class="input-wrap"><span>£</span><InputNumber @bind-Value="Request.PropertyValue" step="any" /></span>
                     </label>
                     <label class="term-field">Mortgage term
                         <span class="input-wrap"><InputNumber @bind-Value="Request.TermYears" min="1" step="1" /><span>years</span></span>
@@ -220,6 +220,6 @@
         null => "Could not reach the application service. Check that the API is running, then try again.",
         _ => "The application service could not complete the request. Please try again later."
     };
-    private static string Money(decimal amount) => amount.ToString("C0", CultureInfo.GetCultureInfo("en-CA"));
-    private static string Percent(decimal value) => value.ToString("P1", CultureInfo.GetCultureInfo("en-CA"));
+    private static string Money(decimal amount) => amount.ToString("C0", CultureInfo.GetCultureInfo("en-GB"));
+    private static string Percent(decimal value) => value.ToString("P1", CultureInfo.GetCultureInfo("en-GB"));
 }
