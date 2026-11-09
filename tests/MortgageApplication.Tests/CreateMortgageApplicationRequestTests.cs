@@ -16,9 +16,19 @@ public sealed class CreateMortgageApplicationRequestTests
     }
 
     [Fact]
-    public void Validate_RejectsDepositEqualToPropertyValue()
+    public void Validate_AcceptsDepositEqualToPropertyValue()
     {
         var request = CreateRequest(depositAmount: 400_000m);
+
+        var errors = Validate(request);
+
+        Assert.Empty(errors);
+    }
+
+    [Fact]
+    public void Validate_RejectsDepositGreaterThanPropertyValue()
+    {
+        var request = CreateRequest(depositAmount: 400_001m);
 
         var errors = Validate(request);
 
@@ -29,6 +39,14 @@ public sealed class CreateMortgageApplicationRequestTests
     public void Validate_AcceptsValidApplication()
     {
         var errors = Validate(CreateRequest());
+
+        Assert.Empty(errors);
+    }
+
+    [Fact]
+    public void Validate_AcceptsAnnualIncomeAboveOneTrillion()
+    {
+        var errors = Validate(CreateRequest(annualIncome: 1_000_000_000_001m));
 
         Assert.Empty(errors);
     }
