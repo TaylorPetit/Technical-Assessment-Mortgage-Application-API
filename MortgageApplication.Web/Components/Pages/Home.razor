@@ -24,7 +24,7 @@
                 <div><h2 id="application-heading">Your details</h2><p>All amounts are in Canadian dollars.</p></div>
             </div>
 
-            <EditForm Model="Request" OnValidSubmit="CreateApplicationAsync">
+            <EditForm Model="Request" FormName="CreateMortgageApplication" OnValidSubmit="CreateApplicationAsync">
                 <DataAnnotationsValidator />
                 <ValidationSummary />
                 <div class="form-grid">
