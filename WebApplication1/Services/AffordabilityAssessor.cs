@@ -15,16 +15,17 @@ public class AffordabilityAssessor
     {
         ArgumentNullException.ThrowIfNull(application);
 
+        var termMonths = (long)application.TermYears * 12;
         var requestedLoan = application.PropertyValue - application.DepositAmount;
         var monthlyGrossIncome = application.AnnualIncome / 12m;
-        var monthlyPayment = CalculateMonthlyPayment(requestedLoan, application.TermYears);
+        var monthlyPayment = CalculateMonthlyPayment(requestedLoan, termMonths);
         var loanToValue = requestedLoan / application.PropertyValue;
         var debtToIncome = (application.MonthlyExpenses + monthlyPayment) / monthlyGrossIncome;
 
         var availableMonthlyPayment = Math.Max(
             0m,
             monthlyGrossIncome * MaximumDebtToIncomeRatio - application.MonthlyExpenses);
-        var incomeBasedMaximum = CalculateMaximumPrincipal(availableMonthlyPayment, application.TermYears);
+        var incomeBasedMaximum = CalculateMaximumPrincipal(availableMonthlyPayment, termMonths);
         var loanToValueBasedMaximum = application.PropertyValue * MaximumLoanToValueRatio;
         var maximumBorrowing = Math.Min(incomeBasedMaximum, loanToValueBasedMaximum);
 
@@ -44,16 +45,15 @@ public class AffordabilityAssessor
             explanation);
     }
 
-    private static decimal CalculateMonthlyPayment(decimal principal, int termYears)
+    private static decimal CalculateMonthlyPayment(decimal principal, long termMonths)
     {
         var monthlyRate = AnnualInterestRate / 12m;
-        var periods = termYears * 12;
-        var growthFactor = DecimalPower(1m + monthlyRate, periods);
+        var discountFactor = DecimalPower(1m / (1m + monthlyRate), termMonths);
 
-        return principal * monthlyRate * growthFactor / (growthFactor - 1m);
+        return principal * monthlyRate / (1m - discountFactor);
     }
 
-    private static decimal CalculateMaximumPrincipal(decimal monthlyPayment, int termYears)
+    private static decimal CalculateMaximumPrincipal(decimal monthlyPayment, long termMonths)
     {
         if (monthlyPayment <= 0m)
         {
@@ -61,16 +61,15 @@ public class AffordabilityAssessor
         }
 
         var monthlyRate = AnnualInterestRate / 12m;
-        var periods = termYears * 12;
-        var discountFactor = DecimalPower(1m + monthlyRate, periods);
+        var discountFactor = DecimalPower(1m / (1m + monthlyRate), termMonths);
 
-        return monthlyPayment * (discountFactor - 1m) / (monthlyRate * discountFactor);
+        return monthlyPayment * (1m - discountFactor) / monthlyRate;
     }
 
-    private static decimal DecimalPower(decimal value, int exponent)
+    private static decimal DecimalPower(decimal value, long exponent)
     {
         var result = 1m;
-        for (var i = 0; i < exponent; i++)
+        for (long i = 0; i < exponent && result > 0m; i++)
         {
             result *= value;
         }
