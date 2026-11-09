@@ -18,27 +18,27 @@ public class AffordabilityAssessor
         var requestedLoan = application.PropertyValue - application.DepositAmount;
         var monthlyGrossIncome = application.AnnualIncome / 12m;
         var monthlyPayment = CalculateMonthlyPayment(requestedLoan, application.TermYears);
-        var ltv = requestedLoan / application.PropertyValue;
-        var dti = (application.MonthlyExpenses + monthlyPayment) / monthlyGrossIncome;
+        var loanToValue = requestedLoan / application.PropertyValue;
+        var debtToIncome = (application.MonthlyExpenses + monthlyPayment) / monthlyGrossIncome;
 
         var availableMonthlyPayment = Math.Max(
             0m,
             monthlyGrossIncome * MaximumDebtToIncomeRatio - application.MonthlyExpenses);
         var incomeBasedMaximum = CalculateMaximumPrincipal(availableMonthlyPayment, application.TermYears);
-        var ltvBasedMaximum = application.PropertyValue * MaximumLoanToValueRatio;
-        var maximumBorrowing = Math.Min(incomeBasedMaximum, ltvBasedMaximum);
+        var loanToValueBasedMaximum = application.PropertyValue * MaximumLoanToValueRatio;
+        var maximumBorrowing = Math.Min(incomeBasedMaximum, loanToValueBasedMaximum);
 
-        var approved = dti <= MaximumDebtToIncomeRatio && ltv <= MaximumLoanToValueRatio;
+        var approved = debtToIncome <= MaximumDebtToIncomeRatio && loanToValue <= MaximumLoanToValueRatio;
         var explanation = approved
             ? "The estimated payment is within the 40% debt-to-income limit and the loan is within the 90% loan-to-value limit."
-            : dti > MaximumDebtToIncomeRatio
+            : debtToIncome > MaximumDebtToIncomeRatio
                 ? "The estimated monthly payment and declared expenses exceed the 40% debt-to-income limit."
                 : "The requested loan exceeds the 90% loan-to-value limit.";
 
         return new AffordabilityAssessment(
             application.Id,
-            ltv,
-            dti,
+            loanToValue,
+            debtToIncome,
             approved,
             maximumBorrowing,
             explanation);
