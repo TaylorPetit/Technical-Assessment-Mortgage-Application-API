@@ -26,7 +26,6 @@
 
             <EditForm Model="Request" FormName="CreateMortgageApplication" OnValidSubmit="CreateApplicationAsync">
                 <DataAnnotationsValidator />
-                <ValidationSummary />
                 <div class="form-grid">
                     <label>Gross annual income
                         <span class="input-wrap"><span>$</span><InputNumber @bind-Value="Request.AnnualIncome" min="0.01" step="0.01" /></span>
@@ -49,10 +48,6 @@
                         <ValidationMessage For="() => Request.TermYears" />
                     </label>
                 </div>
-                @if (!string.IsNullOrEmpty(FormError))
-                {
-                    <p class="field-error" role="alert">@FormError</p>
-                }
                 <button class="button button-primary" type="submit" disabled="@IsBusy">
                     @(IsBusy ? "Submitting…" : "Submit application") <span aria-hidden="true">→</span>
                 </button>
@@ -112,17 +107,11 @@
     private MortgageApplicationResponse? Application;
     private AffordabilityAssessmentResponse? Assessment;
     private string? Message;
-    private string? FormError;
     private bool IsError;
     private bool IsBusy;
 
     private async Task CreateApplicationAsync()
     {
-        FormError = Request.DepositAmount > Request.PropertyValue
-            ? "The deposit cannot be greater than the property value."
-            : null;
-        if (FormError is not null) return;
-
         IsBusy = true;
         Message = null;
         Assessment = null;

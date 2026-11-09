@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MortgageApplication.Web.Models;
 
-public class CreateMortgageApplicationRequest
+public class CreateMortgageApplicationRequest : IValidatableObject
 {
     [Range(typeof(decimal), "0.01", "79228162514264337593543950335", ErrorMessage = "Enter an annual income greater than zero.")]
     public decimal AnnualIncome { get; set; }
@@ -18,4 +18,14 @@ public class CreateMortgageApplicationRequest
 
     [Range(1, int.MaxValue, ErrorMessage = "Enter a term of at least one year.")]
     public int TermYears { get; set; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (DepositAmount > PropertyValue)
+        {
+            yield return new ValidationResult(
+                "Deposit cannot exceed the property value.",
+                [nameof(DepositAmount)]);
+        }
+    }
 }
