@@ -6,7 +6,7 @@ namespace WebApplication1.Controllers;
 
 [ApiController]
 [Route("api/mortgage-applications")]
-public sealed class MortgageApplicationsController(MortgageApplicationService service) : ControllerBase
+public class MortgageApplicationsController(MortgageApplicationService service) : ControllerBase
 {
     [HttpPost]
     [ProducesResponseType<MortgageApplication>(StatusCodes.Status201Created)]

@@ -3,7 +3,7 @@ using WebApplication1.Repositories;
 
 namespace WebApplication1.Services;
 
-public sealed class MortgageApplicationService(
+public class MortgageApplicationService(
     IMortgageApplicationRepository repository,
     AffordabilityAssessor affordabilityAssessor)
 {

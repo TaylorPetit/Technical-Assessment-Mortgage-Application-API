@@ -6,7 +6,7 @@ namespace WebApplication1.Repositories;
 /// <summary>
 /// Small file-backed store for this single-instance exercise implementation.
 /// </summary>
-public sealed class JsonMortgageApplicationRepository : IMortgageApplicationRepository
+public class JsonMortgageApplicationRepository : IMortgageApplicationRepository
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private readonly string _filePath;

@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WebApplication1.Models;
 
-public sealed class CreateMortgageApplicationRequest : IValidatableObject
+public class CreateMortgageApplicationRequest : IValidatableObject
 {
     [Range(typeof(decimal), "0.01", "79228162514264337593543950335", ErrorMessage = "Annual income must be greater than zero.")]
     public decimal AnnualIncome { get; init; }

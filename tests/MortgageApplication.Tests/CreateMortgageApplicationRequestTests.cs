@@ -3,7 +3,7 @@ using WebApplication1.Models;
 
 namespace MortgageApplication.Tests;
 
-public sealed class CreateMortgageApplicationRequestTests
+public class CreateMortgageApplicationRequestTests
 {
     [Fact]
     public void Validate_RejectsZeroAnnualIncome()

@@ -1,6 +1,6 @@
 namespace WebApplication1.Models;
 
-public sealed record MortgageApplication(
+public record MortgageApplication(
     Guid Id,
     decimal AnnualIncome,
     decimal MonthlyExpenses,

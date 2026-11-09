@@ -4,7 +4,7 @@ using MortgageApplicationModel = WebApplication1.Models.MortgageApplication;
 
 namespace MortgageApplication.Tests;
 
-public sealed class AffordabilityAssessorTests
+public class AffordabilityAssessorTests
 {
     private readonly AffordabilityAssessor _assessor = new();
 

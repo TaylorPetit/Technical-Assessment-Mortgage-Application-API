@@ -5,7 +5,7 @@ namespace WebApplication1.Services;
 /// <summary>
 /// Provides a deliberately simplified affordability estimate for the exercise.
 /// </summary>
-public sealed class AffordabilityAssessor
+public class AffordabilityAssessor
 {
     public const decimal AnnualInterestRate = 0.05m;
     public const decimal MaximumDebtToIncomeRatio = 0.40m;

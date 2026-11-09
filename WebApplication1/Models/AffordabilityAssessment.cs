@@ -1,6 +1,6 @@
 namespace WebApplication1.Models;
 
-public sealed record AffordabilityAssessment(
+public record AffordabilityAssessment(
     Guid ApplicationId,
     decimal LoanToValueRatio,
     decimal DebtToIncomeRatio,

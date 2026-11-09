@@ -206,6 +206,6 @@ static async Task ShowErrorAsync(HttpResponseMessage response)
 static void ShowConnectionError(HttpRequestException ex) =>
     Console.WriteLine($"Could not reach the API. Check that it is running and the base URL is correct. {ex.Message}");
 
-sealed record CreateApplicationRequest(decimal AnnualIncome, decimal MonthlyExpenses, decimal DepositAmount, decimal PropertyValue, int TermYears);
-sealed record MortgageApplicationResponse(Guid Id, decimal AnnualIncome, decimal MonthlyExpenses, decimal DepositAmount, decimal PropertyValue, int TermYears, DateTimeOffset CreatedAt);
-sealed record AffordabilityResponse(Guid ApplicationId, decimal LoanToValueRatio, decimal DebtToIncomeRatio, bool Approved, decimal MaximumBorrowingEstimate, string Explanation);
+record CreateApplicationRequest(decimal AnnualIncome, decimal MonthlyExpenses, decimal DepositAmount, decimal PropertyValue, int TermYears);
+record MortgageApplicationResponse(Guid Id, decimal AnnualIncome, decimal MonthlyExpenses, decimal DepositAmount, decimal PropertyValue, int TermYears, DateTimeOffset CreatedAt);
+record AffordabilityResponse(Guid ApplicationId, decimal LoanToValueRatio, decimal DebtToIncomeRatio, bool Approved, decimal MaximumBorrowingEstimate, string Explanation);
