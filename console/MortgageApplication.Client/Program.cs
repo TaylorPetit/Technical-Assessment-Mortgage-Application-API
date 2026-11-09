@@ -2,6 +2,11 @@ using System.Globalization;
 using System.Net.Http.Json;
 using System.Text.Json;
 
+// From the repository root, start the API and client in separate terminals:
+// dotnet run --project MortgageApplication.Api/MortgageApplication.Api.csproj --launch-profile http
+// dotnet run --project console/MortgageApplication.Client/MortgageApplication.Client.csproj
+// The client defaults to http://localhost:5251.
+
 var baseAddress = ReadBaseAddress();
 using var http = new HttpClient { BaseAddress = baseAddress };
 
