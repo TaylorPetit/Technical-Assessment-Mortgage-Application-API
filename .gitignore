@@ -2,6 +2,7 @@
 **/bin/
 **/obj/
 **/TestResults/
+WebApplication1/App_Data/
 .vscode/
 .idea/
 *.user
