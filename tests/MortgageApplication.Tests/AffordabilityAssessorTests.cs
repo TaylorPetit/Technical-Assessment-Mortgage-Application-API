@@ -1,5 +1,6 @@
 using WebApplication1.Models;
 using WebApplication1.Services;
+using MortgageApplicationModel = WebApplication1.Models.MortgageApplication;
 
 namespace MortgageApplication.Tests;
 
@@ -75,7 +76,7 @@ public sealed class AffordabilityAssessorTests
         Assert.Equal(0m, result.MaximumBorrowingEstimate);
     }
 
-    private static MortgageApplication CreateApplication(
+    private static MortgageApplicationModel CreateApplication(
         decimal annualIncome,
         decimal monthlyExpenses,
         decimal depositAmount,
