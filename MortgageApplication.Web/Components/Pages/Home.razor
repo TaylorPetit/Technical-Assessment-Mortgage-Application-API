@@ -7,10 +7,23 @@
 
 <main class="page-shell">
     <section class="intro">
-        <p class="eyebrow">Mortgage application</p>
-        <h1>Plan your next move.</h1>
-        <p class="lead">Enter a few details to submit an application and get an illustrative affordability estimate.</p>
+        <h1>Mortgage application</h1>
+        <p class="lead">Apply or check an existing application.</p>
     </section>
+
+    @if (ValidationErrors.Count > 0)
+    {
+        <section class="validation-popup" role="alert" aria-live="assertive" aria-labelledby="validation-heading">
+            <button class="validation-dismiss" type="button" aria-label="Dismiss validation errors" @onclick="DismissValidationErrors">×</button>
+            <h2 id="validation-heading">Check your details</h2>
+            <ul>
+                @foreach (var error in ValidationErrors)
+                {
+                    <li>@error</li>
+                }
+            </ul>
+        </section>
+    }
 
     @if (!string.IsNullOrWhiteSpace(Message))
     {
@@ -20,32 +33,27 @@
     <div class="content-grid">
         <section class="card application-card" aria-labelledby="application-heading">
             <div class="section-heading">
-                <span class="step">01</span>
                 <div><h2 id="application-heading">Your details</h2><p>All amounts are in Canadian dollars.</p></div>
             </div>
 
-            <EditForm Model="Request" FormName="CreateMortgageApplication" OnValidSubmit="CreateApplicationAsync">
+            <EditForm Model="Request" FormName="CreateMortgageApplication"
+                      OnValidSubmit="CreateApplicationAsync" OnInvalidSubmit="ShowValidationErrors">
                 <DataAnnotationsValidator />
                 <div class="form-grid">
                     <label>Gross annual income
-                        <span class="input-wrap"><span>$</span><InputNumber @bind-Value="Request.AnnualIncome" min="0.01" step="0.01" /></span>
-                        <ValidationMessage For="() => Request.AnnualIncome" />
+                        <span class="input-wrap"><span>$</span><InputNumber @bind-Value="Request.AnnualIncome" step="any" /></span>
                     </label>
                     <label>Existing monthly expenses
-                        <span class="input-wrap"><span>$</span><InputNumber @bind-Value="Request.MonthlyExpenses" min="0" step="0.01" /></span>
-                        <ValidationMessage For="() => Request.MonthlyExpenses" />
+                        <span class="input-wrap"><span>$</span><InputNumber @bind-Value="Request.MonthlyExpenses" step="any" /></span>
                     </label>
                     <label>Deposit
-                        <span class="input-wrap"><span>$</span><InputNumber @bind-Value="Request.DepositAmount" min="0" step="0.01" /></span>
-                        <ValidationMessage For="() => Request.DepositAmount" />
+                        <span class="input-wrap"><span>$</span><InputNumber @bind-Value="Request.DepositAmount" step="any" /></span>
                     </label>
                     <label>Property value
-                        <span class="input-wrap"><span>$</span><InputNumber @bind-Value="Request.PropertyValue" min="0.01" step="0.01" /></span>
-                        <ValidationMessage For="() => Request.PropertyValue" />
+                        <span class="input-wrap"><span>$</span><InputNumber @bind-Value="Request.PropertyValue" step="any" /></span>
                     </label>
                     <label class="term-field">Mortgage term
-                        <span class="input-wrap"><InputNumber @bind-Value="Request.TermYears" min="1" step="1" /><span>years</span></span>
-                        <ValidationMessage For="() => Request.TermYears" />
+                        <span class="input-wrap"><InputNumber @bind-Value="Request.TermYears" step="1" /><span>years</span></span>
                     </label>
                 </div>
                 <button class="button button-primary" type="submit" disabled="@IsBusy">
@@ -56,8 +64,7 @@
 
         <section class="card lookup-card" aria-labelledby="lookup-heading">
             <div class="section-heading">
-                <span class="step">02</span>
-                <div><h2 id="lookup-heading">Already applied?</h2><p>Use your application ID to retrieve the details.</p></div>
+                <div><h2 id="lookup-heading">Existing application</h2></div>
             </div>
             <label class="lookup-label" for="application-id">Application ID</label>
             <InputText id="application-id" class="text-input" @bind-Value="ApplicationId" placeholder="Paste your application ID" />
@@ -98,7 +105,7 @@
             }
         </section>
     </div>
-    <p class="disclaimer">This estimate uses simplified assumptions for the technical assessment. It is not a mortgage offer or financial advice.</p>
+    <p class="disclaimer">Estimate only. Not a mortgage offer or financial advice.</p>
 </main>
 
 @code {
@@ -107,11 +114,13 @@
     private MortgageApplicationResponse? Application;
     private AffordabilityAssessmentResponse? Assessment;
     private string? Message;
+    private List<string> ValidationErrors = [];
     private bool IsError;
     private bool IsBusy;
 
     private async Task CreateApplicationAsync()
     {
+        DismissValidationErrors();
         IsBusy = true;
         Message = null;
         Assessment = null;
@@ -179,6 +188,15 @@
         SetMessage("Enter a valid application ID.", true);
         return false;
     }
+
+    private void ShowValidationErrors(EditContext editContext)
+    {
+        ValidationErrors = editContext.GetValidationMessages()
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+    }
+
+    private void DismissValidationErrors() => ValidationErrors.Clear();
 
     private async Task CopyApplicationIdAsync()
     {
