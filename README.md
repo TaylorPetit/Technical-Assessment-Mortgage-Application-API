@@ -47,6 +47,7 @@ Returns `200 OK` or `404 Not Found`.
 `GET /api/mortgage-applications/{id}/affordability`
 
 Returns `200 OK` with LTV, DTI, approval decision, maximum borrowing estimate, and an explanation. Returns `404 Not Found` when the application does not exist.
+If the financial values exceed the range supported by decimal calculations, the API returns `422 Unprocessable Entity`.
 
 The `MortgageApplication.Api.http` file contains example requests that can be run from Visual Studio.
 

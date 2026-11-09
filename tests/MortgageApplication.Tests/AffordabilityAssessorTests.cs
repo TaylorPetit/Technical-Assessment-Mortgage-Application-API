@@ -28,6 +28,22 @@ public class AffordabilityAssessorTests
     }
 
     [Fact]
+    public void Assess_CalculatesPaymentAndIncomeBasedMaximumBorrowing()
+    {
+        var application = CreateApplication(
+            annualIncome: 100_000m,
+            monthlyExpenses: 1_200m,
+            depositAmount: 700_000m,
+            propertyValue: 1_000_000m,
+            termYears: 25);
+
+        var result = _assessor.Assess(application);
+
+        Assert.InRange(result.DebtToIncomeRatio, 0.3544524148m, 0.3544524151m);
+        Assert.InRange(result.MaximumBorrowingEstimate, 364_928.09m, 364_928.11m);
+    }
+
+    [Fact]
     public void Assess_DeclinesWhenLtvExceedsLimit()
     {
         var application = CreateApplication(

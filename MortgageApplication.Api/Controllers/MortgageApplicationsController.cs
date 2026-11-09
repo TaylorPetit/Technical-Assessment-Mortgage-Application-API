@@ -31,9 +31,20 @@ public class MortgageApplicationsController(MortgageApplicationService service) 
     [HttpGet("{id:guid}/affordability")]
     [ProducesResponseType<AffordabilityAssessment>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status422UnprocessableEntity)]
     public async Task<ActionResult<AffordabilityAssessment>> Assess(Guid id, CancellationToken cancellationToken)
     {
-        var assessment = await service.AssessAsync(id, cancellationToken);
-        return assessment is null ? NotFound() : Ok(assessment);
+        try
+        {
+            var assessment = await service.AssessAsync(id, cancellationToken);
+            return assessment is null ? NotFound() : Ok(assessment);
+        }
+        catch (OverflowException)
+        {
+            return Problem(
+                statusCode: StatusCodes.Status422UnprocessableEntity,
+                title: "Affordability assessment cannot be calculated",
+                detail: "The financial values exceed the range supported by decimal calculations.");
+        }
     }
 }

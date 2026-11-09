@@ -149,6 +149,8 @@ static async Task AssessAffordabilityAsync(HttpClient http)
     {
         if (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
             Console.WriteLine("No application was found with that ID.");
+        else if (ex.StatusCode == System.Net.HttpStatusCode.UnprocessableEntity)
+            Console.WriteLine("The API could not calculate an assessment for these financial values.");
         else
             ShowConnectionError(ex);
     }
