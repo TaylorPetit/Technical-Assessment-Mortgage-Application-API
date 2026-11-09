@@ -3,6 +3,10 @@
 **/obj/
 **/TestResults/
 MortgageApplication.Api/App_Data/
+MortgageApplication.Web/App_Data/
+.dotnet-cli/
+.nuget/
+.blazor-scaffold/
 .vscode/
 .idea/
 *.user

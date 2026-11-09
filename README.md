@@ -1,36 +1,41 @@
 # Mortgage Application API
 
-A small ASP.NET Core 10 JSON API for mortgage applications and affordability estimates.
+A small ASP.NET Core 10 mortgage application system with a JSON API and Blazor web front end.
 
 ## Setup and run
 
-Install the .NET 10 SDK. From the repository root:
+Install the .NET 10 SDK, then restore and build from the repository root:
 
 ```powershell
 dotnet restore
 dotnet build
-dotnet run --project .\MortgageApplication.Api\MortgageApplication.Api.csproj --launch-profile https
 ```
 
-The API listens at `https://localhost:7133` and `http://localhost:5251`. Submitted applications are saved to `MortgageApplication.Api/App_Data/mortgage-applications.json`; the file is created as needed and is not committed.
+Start the API in one terminal:
 
-The `MortgageApplication.Api/MortgageApplication.Api.http` file has sample requests for Visual Studio:
+```powershell
+$env:Authentication__ApiKey = "replace-with-a-long-random-key"
+dotnet run --project .\MortgageApplication.Api\MortgageApplication.Api.csproj --launch-profile http
+```
+
+It listens at `http://localhost:5251`. Submitted applications are saved to `MortgageApplication.Api/App_Data/mortgage-applications.json`; the file is created as needed and is not committed.
+
+In a second terminal, start the Blazor front end:
+
+```powershell
+$env:Api__ApiKey = "replace-with-a-long-random-key"
+dotnet run --project .\MortgageApplication.Web\MortgageApplication.Web.csproj --launch-profile http
+```
+
+Open `http://localhost:5260`. The page submits applications, looks up an application ID, and requests its affordability estimate through the API. Set the same key in both terminals. The Blazor server sends it to the API; it is not included in browser requests. The API address can be changed in `MortgageApplication.Web/appsettings.json`.
+
+The `MortgageApplication.Api/MortgageApplication.Api.http` file has sample requests for Visual Studio. Replace `REPLACE_WITH_API_KEY` with the configured key:
 
 - `POST /api/mortgage-applications` — create an application
 - `GET /api/mortgage-applications/{id}` — retrieve it
 - `GET /api/mortgage-applications/{id}/affordability` — assess it
 
-Create returns `201`; invalid input returns `400`; an unknown ID returns `404`; an uncalculable assessment returns `422`.
-
-## Console client
-
-With the API running, use a second terminal at the repository root:
-
-```powershell
-dotnet run --project .\console\MortgageApplication.Client\MortgageApplication.Client.csproj
-```
-
-The client defaults to `http://localhost:5251` and lets you create, retrieve, and assess an application.
+Create returns `201`; invalid input returns `400`; a request without a valid API key returns `401`; an unknown ID returns `404`; an uncalculable assessment returns `422`.
 
 ## Tests
 
@@ -38,7 +43,7 @@ The client defaults to `http://localhost:5251` and lets you create, retrieve, an
 dotnet test .\tests\MortgageApplication.Tests\MortgageApplication.Tests.csproj
 ```
 
-Unit tests cover affordability calculations, request validation, repository behaviour, and controller outcomes.
+Unit tests cover calculations, validation, repository behaviour, controller outcomes, and generic server error responses.
 
 ## Affordability rules
 
@@ -51,4 +56,5 @@ Approval requires DTI at or below 40% and LTV at or below 90%. Maximum borrowing
 - Validate requests at the API boundary, including that the deposit does not exceed the property value, so invalid applications are rejected before assessment.
 - Keep HTTP handling, business logic, and persistence in separate classes so calculations can be tested without the API or file store.
 - Use a JSON file to keep this exercise simple. The write lock protects only one API process; for concurrent access across multiple instances, I would replace it with a database.
-- Authentication and lender-specific underwriting are outside this exercise. With more time, I would add API integration tests and make the rate and limits configurable.
+- Unexpected API exceptions are logged server-side and returned with a generic message. Expected validation, missing-record, and calculation-limit responses keep their HTTP status without exposing exception details.
+- The API key protects service-to-service requests; customer accounts, roles, and key rotation are beyond this exercise. With more time, I would add API integration tests and make the rate and limits configurable.

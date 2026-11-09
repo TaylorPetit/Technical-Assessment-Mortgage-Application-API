@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging.Abstractions;
 using MortgageApplicationApi.Controllers;
 using MortgageApplicationApi.Models;
 using MortgageApplicationApi.Repositories;
@@ -15,7 +16,7 @@ public class MortgageApplicationsControllerTests
     {
         var repository = new InMemoryMortgageApplicationRepository();
         var service = new MortgageApplicationService(repository, new AffordabilityAssessor());
-        var controller = new MortgageApplicationsController(service);
+        var controller = new MortgageApplicationsController(service, NullLogger<MortgageApplicationsController>.Instance);
         var request = new CreateMortgageApplicationRequest
         {
             AnnualIncome = 100_000m,
@@ -105,7 +106,8 @@ public class MortgageApplicationsControllerTests
             DateTimeOffset.UtcNow);
 
     private static MortgageApplicationsController CreateController(IMortgageApplicationRepository repository) =>
-        new(new MortgageApplicationService(repository, new AffordabilityAssessor()));
+        new(new MortgageApplicationService(repository, new AffordabilityAssessor()),
+            NullLogger<MortgageApplicationsController>.Instance);
 
     private class InMemoryMortgageApplicationRepository : IMortgageApplicationRepository
     {

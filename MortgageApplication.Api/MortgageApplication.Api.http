@@ -1,7 +1,9 @@
-@MortgageApplicationApi_HostAddress = https://localhost:7133
+@MortgageApplicationApi_HostAddress = http://localhost:5251
+@apiKey = REPLACE_WITH_API_KEY
 
 POST {{MortgageApplicationApi_HostAddress}}/api/mortgage-applications
 Content-Type: application/json
+X-Api-Key: {{apiKey}}
 
 {
   "annualIncome": 100000,
@@ -17,8 +19,10 @@ Content-Type: application/json
 
 GET {{MortgageApplicationApi_HostAddress}}/api/mortgage-applications/{{applicationId}}
 Accept: application/json
+X-Api-Key: {{apiKey}}
 
 ###
 
 GET {{MortgageApplicationApi_HostAddress}}/api/mortgage-applications/{{applicationId}}/affordability
 Accept: application/json
+X-Api-Key: {{apiKey}}

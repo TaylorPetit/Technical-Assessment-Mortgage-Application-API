@@ -1,0 +1,218 @@
+@page "/"
+@rendermode InteractiveServer
+@inject MortgageApplicationApiClient Api
+@inject IJSRuntime JS
+
+<PageTitle>Mortgage application</PageTitle>
+
+<main class="page-shell">
+    <section class="intro">
+        <p class="eyebrow">Mortgage application</p>
+        <h1>Plan your next move.</h1>
+        <p class="lead">Enter a few details to submit an application and get an illustrative affordability estimate.</p>
+    </section>
+
+    @if (!string.IsNullOrWhiteSpace(Message))
+    {
+        <div class="notice @(IsError ? "notice-error" : "notice-success")" role="status">@Message</div>
+    }
+
+    <div class="content-grid">
+        <section class="card application-card" aria-labelledby="application-heading">
+            <div class="section-heading">
+                <span class="step">01</span>
+                <div><h2 id="application-heading">Your details</h2><p>All amounts are in Canadian dollars.</p></div>
+            </div>
+
+            <EditForm Model="Request" OnValidSubmit="CreateApplicationAsync">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="form-grid">
+                    <label>Gross annual income
+                        <span class="input-wrap"><span>$</span><InputNumber @bind-Value="Request.AnnualIncome" min="0.01" step="0.01" /></span>
+                        <ValidationMessage For="() => Request.AnnualIncome" />
+                    </label>
+                    <label>Existing monthly expenses
+                        <span class="input-wrap"><span>$</span><InputNumber @bind-Value="Request.MonthlyExpenses" min="0" step="0.01" /></span>
+                        <ValidationMessage For="() => Request.MonthlyExpenses" />
+                    </label>
+                    <label>Deposit
+                        <span class="input-wrap"><span>$</span><InputNumber @bind-Value="Request.DepositAmount" min="0" step="0.01" /></span>
+                        <ValidationMessage For="() => Request.DepositAmount" />
+                    </label>
+                    <label>Property value
+                        <span class="input-wrap"><span>$</span><InputNumber @bind-Value="Request.PropertyValue" min="0.01" step="0.01" /></span>
+                        <ValidationMessage For="() => Request.PropertyValue" />
+                    </label>
+                    <label class="term-field">Mortgage term
+                        <span class="input-wrap"><InputNumber @bind-Value="Request.TermYears" min="1" step="1" /><span>years</span></span>
+                        <ValidationMessage For="() => Request.TermYears" />
+                    </label>
+                </div>
+                @if (!string.IsNullOrEmpty(FormError))
+                {
+                    <p class="field-error" role="alert">@FormError</p>
+                }
+                <button class="button button-primary" type="submit" disabled="@IsBusy">
+                    @(IsBusy ? "Submitting…" : "Submit application") <span aria-hidden="true">→</span>
+                </button>
+            </EditForm>
+        </section>
+
+        <section class="card lookup-card" aria-labelledby="lookup-heading">
+            <div class="section-heading">
+                <span class="step">02</span>
+                <div><h2 id="lookup-heading">Already applied?</h2><p>Use your application ID to retrieve the details.</p></div>
+            </div>
+            <label class="lookup-label" for="application-id">Application ID</label>
+            <InputText id="application-id" class="text-input" @bind-Value="ApplicationId" placeholder="Paste your application ID" />
+            <div class="button-row">
+                <button class="button button-secondary" @onclick="RetrieveApplicationAsync" disabled="@IsBusy">View application</button>
+                <button class="button button-secondary" @onclick="AssessApplicationAsync" disabled="@IsBusy">Check affordability</button>
+            </div>
+
+            @if (Application is not null)
+            {
+                <div class="result-block">
+                    <div class="result-title"><div><p class="eyebrow">Application received</p><h3>Application details</h3></div>
+                        <button class="copy-id" title="Copy the application ID" @onclick="CopyApplicationIdAsync">Copy ID</button>
+                    </div>
+                    <p class="id-value">@Application.Id</p>
+                    <dl class="details-list">
+                        <div><dt>Annual income</dt><dd>@Money(Application.AnnualIncome)</dd></div>
+                        <div><dt>Monthly expenses</dt><dd>@Money(Application.MonthlyExpenses)</dd></div>
+                        <div><dt>Deposit</dt><dd>@Money(Application.DepositAmount)</dd></div>
+                        <div><dt>Property value</dt><dd>@Money(Application.PropertyValue)</dd></div>
+                        <div><dt>Term</dt><dd>@Application.TermYears years</dd></div>
+                    </dl>
+                </div>
+            }
+
+            @if (Assessment is not null)
+            {
+                <div class="assessment @(Assessment.Approved ? "assessment-approved" : "assessment-review")">
+                    <p class="eyebrow">Illustrative estimate</p>
+                    <h3>@(Assessment.Approved ? "Within the example limits" : "Outside the example limits")</h3>
+                    <p>@Assessment.Explanation</p>
+                    <dl class="details-list">
+                        <div><dt>Loan-to-value</dt><dd>@Percent(Assessment.LoanToValueRatio)</dd></div>
+                        <div><dt>Debt-to-income</dt><dd>@Percent(Assessment.DebtToIncomeRatio)</dd></div>
+                        <div><dt>Maximum borrowing estimate</dt><dd>@Money(Assessment.MaximumBorrowingEstimate)</dd></div>
+                    </dl>
+                </div>
+            }
+        </section>
+    </div>
+    <p class="disclaimer">This estimate uses simplified assumptions for the technical assessment. It is not a mortgage offer or financial advice.</p>
+</main>
+
+@code {
+    private readonly CreateMortgageApplicationRequest Request = new();
+    private string ApplicationId = string.Empty;
+    private MortgageApplicationResponse? Application;
+    private AffordabilityAssessmentResponse? Assessment;
+    private string? Message;
+    private string? FormError;
+    private bool IsError;
+    private bool IsBusy;
+
+    private async Task CreateApplicationAsync()
+    {
+        FormError = Request.DepositAmount > Request.PropertyValue
+            ? "The deposit cannot be greater than the property value."
+            : null;
+        if (FormError is not null) return;
+
+        IsBusy = true;
+        Message = null;
+        Assessment = null;
+        try
+        {
+            Application = await Api.CreateAsync(Request);
+            if (Application is null)
+            {
+                SetMessage("The API did not return the new application. Please try again.", true);
+                return;
+            }
+            ApplicationId = Application.Id.ToString();
+            SetMessage("Application submitted. Save the ID to retrieve it later.", false);
+        }
+        catch (InvalidOperationException ex) { SetMessage(ex.Message, true); }
+        catch (HttpRequestException ex) { SetMessage(ServiceError(ex), true); }
+        finally { IsBusy = false; }
+    }
+
+    private async Task RetrieveApplicationAsync()
+    {
+        if (!TryGetApplicationId(out var id)) return;
+        IsBusy = true;
+        Assessment = null;
+        try
+        {
+            Application = await Api.GetAsync(id);
+            SetMessage(Application is null ? "No application was returned." : "Application details loaded.", Application is null);
+        }
+        catch (HttpRequestException ex)
+        {
+            Application = null;
+            SetMessage(ex.StatusCode == System.Net.HttpStatusCode.NotFound
+                ? "No application was found with that ID."
+                : ServiceError(ex), true);
+        }
+        finally { IsBusy = false; }
+    }
+
+    private async Task AssessApplicationAsync()
+    {
+        if (!TryGetApplicationId(out var id)) return;
+        IsBusy = true;
+        try
+        {
+            Assessment = await Api.AssessAsync(id);
+            SetMessage(Assessment is null ? "No affordability result was returned." : "Affordability estimate loaded.", Assessment is null);
+        }
+        catch (HttpRequestException ex)
+        {
+            Assessment = null;
+            SetMessage(ex.StatusCode switch
+            {
+                System.Net.HttpStatusCode.NotFound => "No application was found with that ID.",
+                System.Net.HttpStatusCode.UnprocessableEntity => "The service could not calculate an estimate for these values.",
+                _ => ServiceError(ex)
+            }, true);
+        }
+        finally { IsBusy = false; }
+    }
+
+    private bool TryGetApplicationId(out Guid id)
+    {
+        if (Guid.TryParse(ApplicationId, out id)) { Message = null; return true; }
+        SetMessage("Enter a valid application ID.", true);
+        return false;
+    }
+
+    private async Task CopyApplicationIdAsync()
+    {
+        if (Application is null) return;
+        try
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", Application.Id.ToString());
+            SetMessage("Application ID copied.", false);
+        }
+        catch (JSException)
+        {
+            SetMessage("Copy is not available here. Select the application ID and copy it manually.", true);
+        }
+    }
+
+    private void SetMessage(string message, bool isError) { Message = message; IsError = isError; }
+    private static string ServiceError(HttpRequestException exception) => exception.StatusCode switch
+    {
+        System.Net.HttpStatusCode.Unauthorized => "The application service could not authenticate this request. Check the API key configuration.",
+        System.Net.HttpStatusCode.Forbidden => "This client is not allowed to use the application service.",
+        null => "Could not reach the application service. Check that the API is running, then try again.",
+        _ => "The application service could not complete the request. Please try again later."
+    };
+    private static string Money(decimal amount) => amount.ToString("C0", CultureInfo.GetCultureInfo("en-CA"));
+    private static string Percent(decimal value) => value.ToString("P1", CultureInfo.GetCultureInfo("en-CA"));
+}

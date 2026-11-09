@@ -1,5 +1,5 @@
 <Solution>
   <Project Path="MortgageApplication.Api/MortgageApplication.Api.csproj" />
   <Project Path="tests/MortgageApplication.Tests/MortgageApplication.Tests.csproj" />
-  <Project Path="console/MortgageApplication.Client/MortgageApplication.Client.csproj" />
+  <Project Path="MortgageApplication.Web/MortgageApplication.Web.csproj" />
 </Solution>

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MortgageApplicationApi.Models;
 using MortgageApplicationApi.Services;
@@ -5,8 +6,11 @@ using MortgageApplicationApi.Services;
 namespace MortgageApplicationApi.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/mortgage-applications")]
-public class MortgageApplicationsController(MortgageApplicationService service) : ControllerBase
+public class MortgageApplicationsController(
+    MortgageApplicationService service,
+    ILogger<MortgageApplicationsController> logger) : ControllerBase
 {
     [HttpPost]
     [ProducesResponseType<MortgageApplication>(StatusCodes.Status201Created)]
@@ -16,6 +20,7 @@ public class MortgageApplicationsController(MortgageApplicationService service) 
         CancellationToken cancellationToken)
     {
         var application = await service.CreateAsync(request, cancellationToken);
+        logger.LogInformation("Mortgage application created with ID {ApplicationId}.", application.Id);
         return CreatedAtAction(nameof(GetById), new { id = application.Id }, application);
     }
 
@@ -41,6 +46,9 @@ public class MortgageApplicationsController(MortgageApplicationService service) 
         }
         catch (OverflowException)
         {
+            logger.LogWarning(
+                "Affordability assessment for application {ApplicationId} exceeded the supported calculation range.",
+                id);
             return Problem(
                 statusCode: StatusCodes.Status422UnprocessableEntity,
                 title: "Affordability assessment cannot be calculated",
