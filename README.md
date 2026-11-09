@@ -51,10 +51,18 @@ The estimate uses a fixed 5% annual rate with monthly repayments. Monthly expens
 
 Approval requires DTI at or below 40% and LTV at or below 90%. Maximum borrowing is the lower of the amount supported by the remaining DTI payment budget and 90% of the property value. These are simplified assumptions for the exercise.
 
-## Design notes
+## Design and reflection
 
-- Validate requests at the API boundary, including that the deposit does not exceed the property value, so invalid applications are rejected before assessment.
-- Keep HTTP handling, business logic, and persistence in separate classes so calculations can be tested without the API or file store.
-- Use a JSON file to keep this exercise simple. The write lock protects only one API process; for concurrent access across multiple instances, I would replace it with a database.
-- Unexpected API exceptions are logged server-side and returned with a generic message. Expected validation, missing-record, and calculation-limit responses keep their HTTP status without exposing exception details.
-- The API key protects service-to-service requests; customer accounts, roles, and key rotation are beyond this exercise. With more time, I would add API integration tests and make the rate and limits configurable.
+### Key decisions
+
+- Validate requests at the API boundary and keep HTTP handling, calculations, and storage in separate classes. This keeps invalid applications out of the assessment logic and makes the calculations testable on their own.
+- Use a JSON file for simple, inspectable local persistence. Its write lock only coordinates one API process.
+- Protect API requests with a configured API key. Unexpected errors are logged on the server and returned to clients with a generic message.
+
+### Scaling
+
+The first change would be replacing the JSON file with a database. The current repository reads and rewrites the full file and only coordinates one process, which limits throughput and prevents safe multi-instance use.
+
+### Trade-offs and next steps
+
+The rate, DTI and LTV limits are fixed examples; this does not implement lender-specific underwriting or customer accounts. With more time, I would add API integration tests, make the assumptions configurable, and add customer identity and key rotation.
