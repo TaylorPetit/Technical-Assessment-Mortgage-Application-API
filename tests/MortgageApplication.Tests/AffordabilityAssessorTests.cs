@@ -44,6 +44,55 @@ public class AffordabilityAssessorTests
     }
 
     [Fact]
+    public void Assess_ApprovesApplicationAtDtiLimit()
+    {
+        var application = CreateApplication(
+            annualIncome: 120_000m,
+            monthlyExpenses: 4_000m,
+            depositAmount: 400_000m,
+            propertyValue: 400_000m,
+            termYears: 25);
+
+        var result = _assessor.Assess(application);
+
+        Assert.Equal(AffordabilityAssessor.MaximumDebtToIncomeRatio, result.DebtToIncomeRatio);
+        Assert.True(result.Approved);
+    }
+
+    [Fact]
+    public void Assess_ApprovesApplicationAtLtvLimitAndCapsMaximumBorrowing()
+    {
+        var application = CreateApplication(
+            annualIncome: 1_000_000m,
+            monthlyExpenses: 0m,
+            depositAmount: 40_000m,
+            propertyValue: 400_000m,
+            termYears: 25);
+
+        var result = _assessor.Assess(application);
+
+        Assert.Equal(AffordabilityAssessor.MaximumLoanToValueRatio, result.LoanToValueRatio);
+        Assert.True(result.Approved);
+        Assert.Equal(360_000m, result.MaximumBorrowingEstimate);
+    }
+
+    [Fact]
+    public void Assess_HandlesLargestSupportedTermWithoutIteratingOncePerMonth()
+    {
+        var application = CreateApplication(
+            annualIncome: 100_000m,
+            monthlyExpenses: 0m,
+            depositAmount: 1_000m,
+            propertyValue: 2_000m,
+            termYears: int.MaxValue);
+
+        var result = _assessor.Assess(application);
+
+        Assert.InRange(result.DebtToIncomeRatio, 0.000499999m, 0.000500001m);
+        Assert.Equal(1_800m, result.MaximumBorrowingEstimate);
+    }
+
+    [Fact]
     public void Assess_DeclinesWhenLtvExceedsLimit()
     {
         var application = CreateApplication(
