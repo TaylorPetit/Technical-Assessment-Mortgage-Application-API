@@ -69,9 +69,19 @@ public class AffordabilityAssessor
     private static decimal DecimalPower(decimal value, long exponent)
     {
         var result = 1m;
-        for (long i = 0; i < exponent && result > 0m; i++)
+        while (exponent > 0)
         {
-            result *= value;
+            if ((exponent & 1) == 1)
+            {
+                result *= value;
+            }
+
+            exponent >>= 1;
+
+            if (exponent > 0)
+            {
+                value *= value;
+            }
         }
 
         return result;
