@@ -11,14 +11,14 @@ public class AffordabilityAssessorTests
     [Fact]
     public void Assess_ApprovesApplicationWithinDtiAndLtvLimits()
     {
-        var application = CreateApplication(
+        MortgageApplicationModel application = CreateApplication(
             annualIncome: 100_000m,
             monthlyExpenses: 1_000m,
             depositAmount: 100_000m,
             propertyValue: 400_000m,
             termYears: 25);
 
-        var result = _assessor.Assess(application);
+        AffordabilityAssessment result = _assessor.Assess(application);
 
         Assert.True(result.Approved);
         Assert.Equal(0.75m, result.LoanToValueRatio);
@@ -30,14 +30,14 @@ public class AffordabilityAssessorTests
     [Fact]
     public void Assess_CalculatesPaymentAndIncomeBasedMaximumBorrowing()
     {
-        var application = CreateApplication(
+        MortgageApplicationModel application = CreateApplication(
             annualIncome: 100_000m,
             monthlyExpenses: 1_200m,
             depositAmount: 700_000m,
             propertyValue: 1_000_000m,
             termYears: 25);
 
-        var result = _assessor.Assess(application);
+        AffordabilityAssessment result = _assessor.Assess(application);
 
         Assert.InRange(result.DebtToIncomeRatio, 0.3544524148m, 0.3544524151m);
         Assert.InRange(result.MaximumBorrowingEstimate, 364_928.09m, 364_928.11m);
@@ -46,14 +46,14 @@ public class AffordabilityAssessorTests
     [Fact]
     public void Assess_ApprovesApplicationAtDtiLimit()
     {
-        var application = CreateApplication(
+        MortgageApplicationModel application = CreateApplication(
             annualIncome: 120_000m,
             monthlyExpenses: 4_000m,
             depositAmount: 400_000m,
             propertyValue: 400_000m,
             termYears: 25);
 
-        var result = _assessor.Assess(application);
+        AffordabilityAssessment result = _assessor.Assess(application);
 
         Assert.Equal(AffordabilityAssessor.MaximumDebtToIncomeRatio, result.DebtToIncomeRatio);
         Assert.True(result.Approved);
@@ -62,14 +62,14 @@ public class AffordabilityAssessorTests
     [Fact]
     public void Assess_ApprovesApplicationAtLtvLimitAndCapsMaximumBorrowing()
     {
-        var application = CreateApplication(
+        MortgageApplicationModel application = CreateApplication(
             annualIncome: 1_000_000m,
             monthlyExpenses: 0m,
             depositAmount: 40_000m,
             propertyValue: 400_000m,
             termYears: 25);
 
-        var result = _assessor.Assess(application);
+        AffordabilityAssessment result = _assessor.Assess(application);
 
         Assert.Equal(AffordabilityAssessor.MaximumLoanToValueRatio, result.LoanToValueRatio);
         Assert.True(result.Approved);
@@ -79,14 +79,14 @@ public class AffordabilityAssessorTests
     [Fact]
     public void Assess_HandlesLargestSupportedTermWithoutIteratingOncePerMonth()
     {
-        var application = CreateApplication(
+        MortgageApplicationModel application = CreateApplication(
             annualIncome: 100_000m,
             monthlyExpenses: 0m,
             depositAmount: 1_000m,
             propertyValue: 2_000m,
             termYears: int.MaxValue);
 
-        var result = _assessor.Assess(application);
+        AffordabilityAssessment result = _assessor.Assess(application);
 
         Assert.InRange(result.DebtToIncomeRatio, 0.000499999m, 0.000500001m);
         Assert.Equal(1_800m, result.MaximumBorrowingEstimate);
@@ -95,14 +95,14 @@ public class AffordabilityAssessorTests
     [Fact]
     public void Assess_DeclinesWhenLtvExceedsLimit()
     {
-        var application = CreateApplication(
+        MortgageApplicationModel application = CreateApplication(
             annualIncome: 200_000m,
             monthlyExpenses: 500m,
             depositAmount: 10_000m,
             propertyValue: 400_000m,
             termYears: 25);
 
-        var result = _assessor.Assess(application);
+        AffordabilityAssessment result = _assessor.Assess(application);
 
         Assert.False(result.Approved);
         Assert.Equal(0.975m, result.LoanToValueRatio);
@@ -112,14 +112,14 @@ public class AffordabilityAssessorTests
     [Fact]
     public void Assess_DeclinesWhenDtiExceedsLimit()
     {
-        var application = CreateApplication(
+        MortgageApplicationModel application = CreateApplication(
             annualIncome: 60_000m,
             monthlyExpenses: 2_500m,
             depositAmount: 50_000m,
             propertyValue: 300_000m,
             termYears: 25);
 
-        var result = _assessor.Assess(application);
+        AffordabilityAssessment result = _assessor.Assess(application);
 
         Assert.False(result.Approved);
         Assert.True(result.DebtToIncomeRatio > AffordabilityAssessor.MaximumDebtToIncomeRatio);
@@ -129,14 +129,14 @@ public class AffordabilityAssessorTests
     [Fact]
     public void Assess_ReturnsZeroMaximumBorrowingWhenExpensesUseAllDtiCapacity()
     {
-        var application = CreateApplication(
+        MortgageApplicationModel application = CreateApplication(
             annualIncome: 60_000m,
             monthlyExpenses: 2_000m,
             depositAmount: 100_000m,
             propertyValue: 300_000m,
             termYears: 25);
 
-        var result = _assessor.Assess(application);
+        AffordabilityAssessment result = _assessor.Assess(application);
 
         Assert.Equal(0m, result.MaximumBorrowingEstimate);
     }

@@ -2,7 +2,7 @@ using MortgageApplicationApi.Models;
 
 namespace MortgageApplicationApi.Services;
 
-public class AffordabilityAssessor
+public class AffordabilityAssessor : IAffordabilityAssessor
 {
     public const decimal AnnualInterestRate = 0.05m;
     public const decimal MaximumDebtToIncomeRatio = 0.40m;
@@ -12,22 +12,22 @@ public class AffordabilityAssessor
     {
         ArgumentNullException.ThrowIfNull(application);
 
-        var termMonths = (long)application.TermYears * 12;
-        var requestedLoan = application.PropertyValue - application.DepositAmount;
-        var monthlyGrossIncome = application.AnnualIncome / 12m;
-        var monthlyPayment = CalculateMonthlyPayment(requestedLoan, termMonths);
-        var loanToValue = requestedLoan / application.PropertyValue;
-        var debtToIncome = (application.MonthlyExpenses + monthlyPayment) / monthlyGrossIncome;
+        long termMonths = (long)application.TermYears * 12;
+        decimal requestedLoan = application.PropertyValue - application.DepositAmount;
+        decimal monthlyGrossIncome = application.AnnualIncome / 12m;
+        decimal monthlyPayment = CalculateMonthlyPayment(requestedLoan, termMonths);
+        decimal loanToValue = requestedLoan / application.PropertyValue;
+        decimal debtToIncome = (application.MonthlyExpenses + monthlyPayment) / monthlyGrossIncome;
 
-        var availableMonthlyPayment = Math.Max(
+        decimal availableMonthlyPayment = Math.Max(
             0m,
             monthlyGrossIncome * MaximumDebtToIncomeRatio - application.MonthlyExpenses);
-        var incomeBasedMaximum = CalculateMaximumPrincipal(availableMonthlyPayment, termMonths);
-        var loanToValueBasedMaximum = application.PropertyValue * MaximumLoanToValueRatio;
-        var maximumBorrowing = Math.Min(incomeBasedMaximum, loanToValueBasedMaximum);
+        decimal incomeBasedMaximum = CalculateMaximumPrincipal(availableMonthlyPayment, termMonths);
+        decimal loanToValueBasedMaximum = application.PropertyValue * MaximumLoanToValueRatio;
+        decimal maximumBorrowing = Math.Min(incomeBasedMaximum, loanToValueBasedMaximum);
 
-        var approved = debtToIncome <= MaximumDebtToIncomeRatio && loanToValue <= MaximumLoanToValueRatio;
-        var explanation = approved
+        bool approved = debtToIncome <= MaximumDebtToIncomeRatio && loanToValue <= MaximumLoanToValueRatio;
+        string explanation = approved
             ? "The estimated payment is within the 40% debt-to-income limit and the loan is within the 90% loan-to-value limit."
             : debtToIncome > MaximumDebtToIncomeRatio
                 ? "The estimated monthly payment and declared expenses exceed the 40% debt-to-income limit."
@@ -44,8 +44,8 @@ public class AffordabilityAssessor
 
     private static decimal CalculateMonthlyPayment(decimal principal, long termMonths)
     {
-        var monthlyRate = AnnualInterestRate / 12m;
-        var discountFactor = DecimalPower(1m / (1m + monthlyRate), termMonths);
+        decimal monthlyRate = AnnualInterestRate / 12m;
+        decimal discountFactor = DecimalPower(1m / (1m + monthlyRate), termMonths);
 
         return principal * monthlyRate / (1m - discountFactor);
     }
@@ -57,15 +57,15 @@ public class AffordabilityAssessor
             return 0m;
         }
 
-        var monthlyRate = AnnualInterestRate / 12m;
-        var discountFactor = DecimalPower(1m / (1m + monthlyRate), termMonths);
+        decimal monthlyRate = AnnualInterestRate / 12m;
+        decimal discountFactor = DecimalPower(1m / (1m + monthlyRate), termMonths);
 
         return monthlyPayment * (1m - discountFactor) / monthlyRate;
     }
 
     private static decimal DecimalPower(decimal value, long exponent)
     {
-        var result = 1m;
+        decimal result = 1m;
         while (exponent > 0)
         {
             if ((exponent & 1) == 1)

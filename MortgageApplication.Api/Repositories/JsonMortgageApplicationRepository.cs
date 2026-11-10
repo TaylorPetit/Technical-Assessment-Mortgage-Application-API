@@ -23,16 +23,16 @@ public class JsonMortgageApplicationRepository : IMortgageApplicationRepository
         await _gate.WaitAsync(cancellationToken);
         try
         {
-            var applications = await ReadAllAsync(cancellationToken);
+            List<MortgageApplication> applications = await ReadAllAsync(cancellationToken);
             applications.Add(application);
 
-            var directory = Path.GetDirectoryName(_filePath)!;
+            string directory = Path.GetDirectoryName(_filePath)!;
             Directory.CreateDirectory(directory);
 
-            var temporaryPath = $"{_filePath}.{Guid.NewGuid():N}.tmp";
+            string temporaryPath = $"{_filePath}.{Guid.NewGuid():N}.tmp";
             try
             {
-                var json = JsonSerializer.Serialize(applications, JsonOptions);
+                string json = JsonSerializer.Serialize(applications, JsonOptions);
                 await File.WriteAllTextAsync(temporaryPath, json, cancellationToken);
                 File.Move(temporaryPath, _filePath, overwrite: true);
             }
@@ -70,7 +70,7 @@ public class JsonMortgageApplicationRepository : IMortgageApplicationRepository
             return [];
         }
 
-        await using var stream = File.OpenRead(_filePath);
+        await using FileStream stream = File.OpenRead(_filePath);
         return await JsonSerializer.DeserializeAsync<List<MortgageApplication>>(stream, JsonOptions, cancellationToken)
             ?? [];
     }

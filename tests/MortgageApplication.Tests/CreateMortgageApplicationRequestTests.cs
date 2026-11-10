@@ -9,9 +9,9 @@ public class CreateMortgageApplicationRequestTests
     [Fact]
     public void Validate_RejectsZeroAnnualIncome()
     {
-        var request = CreateRequest(annualIncome: 0m);
+        CreateMortgageApplicationRequest request = CreateRequest(annualIncome: 0m);
 
-        var errors = Validate(request);
+        List<ValidationResult> errors = Validate(request);
 
         Assert.Contains(errors, error => error.MemberNames.Contains(nameof(request.AnnualIncome)));
     }
@@ -19,9 +19,9 @@ public class CreateMortgageApplicationRequestTests
     [Fact]
     public void Validate_RejectsNegativeMonthlyExpenses()
     {
-        var request = CreateRequest(monthlyExpenses: -1m);
+        CreateMortgageApplicationRequest request = CreateRequest(monthlyExpenses: -1m);
 
-        var errors = Validate(request);
+        List<ValidationResult> errors = Validate(request);
 
         Assert.Contains(errors, error => error.MemberNames.Contains(nameof(request.MonthlyExpenses)));
     }
@@ -29,9 +29,9 @@ public class CreateMortgageApplicationRequestTests
     [Fact]
     public void Validate_RejectsNegativeDeposit()
     {
-        var request = CreateRequest(depositAmount: -1m);
+        CreateMortgageApplicationRequest request = CreateRequest(depositAmount: -1m);
 
-        var errors = Validate(request);
+        List<ValidationResult> errors = Validate(request);
 
         Assert.Contains(errors, error => error.MemberNames.Contains(nameof(request.DepositAmount)));
     }
@@ -39,9 +39,9 @@ public class CreateMortgageApplicationRequestTests
     [Fact]
     public void Validate_RejectsZeroPropertyValue()
     {
-        var request = CreateRequest(propertyValue: 0m);
+        CreateMortgageApplicationRequest request = CreateRequest(propertyValue: 0m);
 
-        var errors = Validate(request);
+        List<ValidationResult> errors = Validate(request);
 
         Assert.Contains(errors, error => error.MemberNames.Contains(nameof(request.PropertyValue)));
     }
@@ -49,9 +49,9 @@ public class CreateMortgageApplicationRequestTests
     [Fact]
     public void Validate_RejectsZeroTerm()
     {
-        var request = CreateRequest(termYears: 0);
+        CreateMortgageApplicationRequest request = CreateRequest(termYears: 0);
 
-        var errors = Validate(request);
+        List<ValidationResult> errors = Validate(request);
 
         Assert.Contains(errors, error => error.MemberNames.Contains(nameof(request.TermYears)));
     }
@@ -65,9 +65,9 @@ public class CreateMortgageApplicationRequestTests
     [Fact]
     public void Validate_AcceptsDepositEqualToPropertyValue()
     {
-        var request = CreateRequest(depositAmount: 400_000m);
+        CreateMortgageApplicationRequest request = CreateRequest(depositAmount: 400_000m);
 
-        var errors = Validate(request);
+        List<ValidationResult> errors = Validate(request);
 
         Assert.Empty(errors);
     }
@@ -75,9 +75,9 @@ public class CreateMortgageApplicationRequestTests
     [Fact]
     public void Validate_RejectsDepositGreaterThanPropertyValue()
     {
-        var request = CreateRequest(depositAmount: 400_001m);
+        CreateMortgageApplicationRequest request = CreateRequest(depositAmount: 400_001m);
 
-        var errors = Validate(request);
+        List<ValidationResult> errors = Validate(request);
 
         Assert.Contains(errors, error => error.MemberNames.Contains(nameof(request.DepositAmount)));
     }
@@ -85,7 +85,7 @@ public class CreateMortgageApplicationRequestTests
     [Fact]
     public void Validate_AcceptsValidApplication()
     {
-        var errors = Validate(CreateRequest());
+        List<ValidationResult> errors = Validate(CreateRequest());
 
         Assert.Empty(errors);
     }
@@ -93,7 +93,7 @@ public class CreateMortgageApplicationRequestTests
     [Fact]
     public void Validate_AcceptsAnnualIncomeAboveOneTrillion()
     {
-        var errors = Validate(CreateRequest(annualIncome: 1_000_000_000_001m));
+        List<ValidationResult> errors = Validate(CreateRequest(annualIncome: 1_000_000_000_001m));
 
         Assert.Empty(errors);
     }
@@ -101,14 +101,14 @@ public class CreateMortgageApplicationRequestTests
     [Fact]
     public void Validate_AcceptsDecimalMaximumAmountsAndLargestTerm()
     {
-        var request = CreateRequest(
+        CreateMortgageApplicationRequest request = CreateRequest(
             annualIncome: decimal.MaxValue,
             monthlyExpenses: decimal.MaxValue,
             depositAmount: 0m,
             propertyValue: decimal.MaxValue,
             termYears: int.MaxValue);
 
-        var errors = Validate(request);
+        List<ValidationResult> errors = Validate(request);
 
         Assert.Empty(errors);
     }
@@ -116,21 +116,21 @@ public class CreateMortgageApplicationRequestTests
     [Fact]
     public void Validate_AcceptsMinimumPositiveIncomePropertyValueAndTerm()
     {
-        var request = CreateRequest(
+        CreateMortgageApplicationRequest request = CreateRequest(
             annualIncome: 0.01m,
             monthlyExpenses: 0m,
             depositAmount: 0m,
             propertyValue: 0.01m,
             termYears: 1);
 
-        var errors = Validate(request);
+        List<ValidationResult> errors = Validate(request);
 
         Assert.Empty(errors);
     }
 
     private static List<ValidationResult> Validate(CreateMortgageApplicationRequest request)
     {
-        var errors = new List<ValidationResult>();
+        List<ValidationResult> errors = new();
         Validator.TryValidateObject(request, new ValidationContext(request), errors, validateAllProperties: true);
         return errors;
     }

@@ -19,7 +19,7 @@ public class MortgageApplicationsController(
         [FromBody] CreateMortgageApplicationRequest request,
         CancellationToken cancellationToken)
     {
-        var application = await service.CreateAsync(request, cancellationToken);
+        MortgageApplication application = await service.CreateAsync(request, cancellationToken);
         logger.LogInformation("Mortgage application created with ID {ApplicationId}.", application.Id);
         return CreatedAtAction(nameof(GetById), new { id = application.Id }, application);
     }
@@ -29,7 +29,7 @@ public class MortgageApplicationsController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<MortgageApplication>> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var application = await service.GetByIdAsync(id, cancellationToken);
+        MortgageApplication? application = await service.GetByIdAsync(id, cancellationToken);
         return application is null ? NotFound() : Ok(application);
     }
 
@@ -41,7 +41,7 @@ public class MortgageApplicationsController(
     {
         try
         {
-            var assessment = await service.AssessAsync(id, cancellationToken);
+            AffordabilityAssessment? assessment = await service.AssessAsync(id, cancellationToken);
             return assessment is null ? NotFound() : Ok(assessment);
         }
         catch (OverflowException)

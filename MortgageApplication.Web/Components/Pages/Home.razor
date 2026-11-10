@@ -11,13 +11,13 @@
         <p class="lead">Apply or check an existing application.</p>
     </section>
 
-    @if (ValidationErrors.Count > 0)
+    @if (_validationErrors.Count > 0)
     {
         <section class="validation-popup" role="alert" aria-live="assertive" aria-labelledby="validation-heading">
             <button class="validation-dismiss" type="button" aria-label="Dismiss validation errors" @onclick="DismissValidationErrors">×</button>
             <h2 id="validation-heading">Check your details</h2>
             <ul>
-                @foreach (var error in ValidationErrors)
+                @foreach (string error in _validationErrors)
                 {
                     <li>@error</li>
                 }
@@ -25,9 +25,9 @@
         </section>
     }
 
-    @if (!string.IsNullOrWhiteSpace(Message))
+    @if (!string.IsNullOrWhiteSpace(_message))
     {
-        <div class="notice @(IsError ? "notice-error" : "notice-success")" role="status">@Message</div>
+        <div class="notice @(_isError ? "notice-error" : "notice-success")" role="status">@_message</div>
     }
 
     <div class="content-grid">
@@ -36,28 +36,28 @@
                 <div><h2 id="application-heading">Your details</h2></div>
             </div>
 
-            <EditForm Model="Request" FormName="CreateMortgageApplication"
+            <EditForm Model="_request" FormName="CreateMortgageApplication"
                       OnValidSubmit="CreateApplicationAsync" OnInvalidSubmit="ShowValidationErrors">
                 <DataAnnotationsValidator />
                 <div class="form-grid">
                     <label>Gross annual income
-                        <span class="input-wrap"><span>£</span><InputNumber @bind-Value="Request.AnnualIncome" step="any" /></span>
+                        <span class="input-wrap"><span>£</span><InputNumber @bind-Value="_request.AnnualIncome" step="any" /></span>
                     </label>
                     <label>Existing monthly expenses
-                        <span class="input-wrap"><span>£</span><InputNumber @bind-Value="Request.MonthlyExpenses" step="any" /></span>
+                        <span class="input-wrap"><span>£</span><InputNumber @bind-Value="_request.MonthlyExpenses" step="any" /></span>
                     </label>
                     <label>Deposit
-                        <span class="input-wrap"><span>£</span><InputNumber @bind-Value="Request.DepositAmount" step="any" /></span>
+                        <span class="input-wrap"><span>£</span><InputNumber @bind-Value="_request.DepositAmount" step="any" /></span>
                     </label>
                     <label>Property value
-                        <span class="input-wrap"><span>£</span><InputNumber @bind-Value="Request.PropertyValue" step="any" /></span>
+                        <span class="input-wrap"><span>£</span><InputNumber @bind-Value="_request.PropertyValue" step="any" /></span>
                     </label>
                     <label class="term-field">Mortgage term
-                        <span class="input-wrap"><InputNumber @bind-Value="Request.TermYears" min="1" step="1" /><span>years</span></span>
+                        <span class="input-wrap"><InputNumber @bind-Value="_request.TermYears" min="1" step="1" /><span>years</span></span>
                     </label>
                 </div>
-                <button class="button button-primary" type="submit" disabled="@IsBusy">
-                    @(IsBusy ? "Submitting…" : "Submit application") <span aria-hidden="true">→</span>
+                <button class="button button-primary" type="submit" disabled="@_isBusy">
+                    @(_isBusy ? "Submitting…" : "Submit application") <span aria-hidden="true">→</span>
                 </button>
             </EditForm>
         </section>
@@ -67,39 +67,39 @@
                 <div><h2 id="lookup-heading">Existing application</h2></div>
             </div>
             <label class="lookup-label" for="application-id">Application ID</label>
-            <InputText id="application-id" class="text-input" @bind-Value="ApplicationId" placeholder="Paste your application ID" />
+            <InputText id="application-id" class="text-input" @bind-Value="_applicationId" placeholder="Paste your application ID" />
             <div class="button-row">
-                <button class="button button-secondary" @onclick="RetrieveApplicationAsync" disabled="@IsBusy">View application</button>
-                <button class="button button-secondary" @onclick="AssessApplicationAsync" disabled="@IsBusy">Check affordability</button>
+                <button class="button button-secondary" @onclick="RetrieveApplicationAsync" disabled="@_isBusy">View application</button>
+                <button class="button button-secondary" @onclick="AssessApplicationAsync" disabled="@_isBusy">Check affordability</button>
             </div>
 
-            @if (Application is not null)
+            @if (_application is not null)
             {
                 <div class="result-block">
                     <div class="result-title"><div><p class="eyebrow">Application received</p><h3>Application details</h3></div>
                         <button class="copy-id" title="Copy the application ID" @onclick="CopyApplicationIdAsync">Copy ID</button>
                     </div>
-                    <p class="id-value">@Application.Id</p>
+                    <p class="id-value">@_application.Id</p>
                     <dl class="details-list">
-                        <div><dt>Annual income</dt><dd>@Money(Application.AnnualIncome)</dd></div>
-                        <div><dt>Monthly expenses</dt><dd>@Money(Application.MonthlyExpenses)</dd></div>
-                        <div><dt>Deposit</dt><dd>@Money(Application.DepositAmount)</dd></div>
-                        <div><dt>Property value</dt><dd>@Money(Application.PropertyValue)</dd></div>
-                        <div><dt>Term</dt><dd>@Application.TermYears years</dd></div>
+                        <div><dt>Annual income</dt><dd>@Money(_application.AnnualIncome)</dd></div>
+                        <div><dt>Monthly expenses</dt><dd>@Money(_application.MonthlyExpenses)</dd></div>
+                        <div><dt>Deposit</dt><dd>@Money(_application.DepositAmount)</dd></div>
+                        <div><dt>Property value</dt><dd>@Money(_application.PropertyValue)</dd></div>
+                        <div><dt>Term</dt><dd>@_application.TermYears years</dd></div>
                     </dl>
                 </div>
             }
 
-            @if (Assessment is not null)
+            @if (_assessment is not null)
             {
-                <div class="assessment @(Assessment.Approved ? "assessment-approved" : "assessment-review")">
+                <div class="assessment @(_assessment.Approved ? "assessment-approved" : "assessment-review")">
                     <p class="eyebrow">Illustrative estimate</p>
-                    <h3>@(Assessment.Approved ? "Within the example limits" : "Outside the example limits")</h3>
-                    <p>@Assessment.Explanation</p>
+                    <h3>@(_assessment.Approved ? "Within the example limits" : "Outside the example limits")</h3>
+                    <p>@_assessment.Explanation</p>
                     <dl class="details-list">
-                        <div><dt>Loan-to-value</dt><dd>@Percent(Assessment.LoanToValueRatio)</dd></div>
-                        <div><dt>Debt-to-income</dt><dd>@Percent(Assessment.DebtToIncomeRatio)</dd></div>
-                        <div><dt>Maximum borrowing estimate</dt><dd>@Money(Assessment.MaximumBorrowingEstimate)</dd></div>
+                        <div><dt>Loan-to-value</dt><dd>@Percent(_assessment.LoanToValueRatio)</dd></div>
+                        <div><dt>Debt-to-income</dt><dd>@Percent(_assessment.DebtToIncomeRatio)</dd></div>
+                        <div><dt>Maximum borrowing estimate</dt><dd>@Money(_assessment.MaximumBorrowingEstimate)</dd></div>
                     </dl>
                 </div>
             }
@@ -108,69 +108,81 @@
 </main>
 
 @code {
-    private readonly CreateMortgageApplicationRequest Request = new();
-    private string ApplicationId = string.Empty;
-    private MortgageApplicationResponse? Application;
-    private AffordabilityAssessmentResponse? Assessment;
-    private string? Message;
-    private List<string> ValidationErrors = [];
-    private bool IsError;
-    private bool IsBusy;
+    private readonly CreateMortgageApplicationRequest _request = new();
+    private string _applicationId = string.Empty;
+    private MortgageApplicationResponse? _application;
+    private AffordabilityAssessmentResponse? _assessment;
+    private string? _message;
+    private List<string> _validationErrors = [];
+    private bool _isError;
+    private bool _isBusy;
 
     private async Task CreateApplicationAsync()
     {
         DismissValidationErrors();
-        IsBusy = true;
-        Message = null;
-        Assessment = null;
+        _isBusy = true;
+        _message = null;
+        _assessment = null;
         try
         {
-            Application = await Api.CreateAsync(Request);
-            if (Application is null)
+            _application = await Api.CreateAsync(_request);
+            if (_application is null)
             {
                 SetMessage("The API did not return the new application. Please try again.", true);
                 return;
             }
-            ApplicationId = Application.Id.ToString();
+            _applicationId = _application.Id.ToString();
             SetMessage("Application submitted. Save the ID to retrieve it later.", false);
         }
-        catch (InvalidOperationException ex) { SetMessage(ex.Message, true); }
-        catch (HttpRequestException ex) { SetMessage(ServiceError(ex), true); }
-        finally { IsBusy = false; }
+        catch (InvalidOperationException exception)
+        {
+            SetMessage(exception.Message, true);
+        }
+        catch (HttpRequestException exception)
+        {
+            SetMessage(ServiceError(exception), true);
+        }
+        finally
+        {
+            _isBusy = false;
+        }
     }
 
     private async Task RetrieveApplicationAsync()
     {
-        if (!TryGetApplicationId(out var id)) return;
-        IsBusy = true;
-        Assessment = null;
+        if (!TryGetApplicationId(out Guid id)) return;
+        _isBusy = true;
+        _assessment = null;
         try
         {
-            Application = await Api.GetAsync(id);
-            SetMessage(Application is null ? "No application was returned." : "Application details loaded.", Application is null);
+            _application = await Api.GetAsync(id);
+            SetMessage(_application is null ? "No application was returned." : "Application details loaded.", _application is null);
         }
         catch (HttpRequestException ex)
         {
-            Application = null;
+            _application = null;
             SetMessage(ex.StatusCode == System.Net.HttpStatusCode.NotFound
                 ? "No application was found with that ID."
                 : ServiceError(ex), true);
         }
-        finally { IsBusy = false; }
+        finally
+        {
+            _isBusy = false;
+        }
     }
 
     private async Task AssessApplicationAsync()
     {
-        if (!TryGetApplicationId(out var id)) return;
-        IsBusy = true;
+        if (!TryGetApplicationId(out Guid id)) return;
+        _isBusy = true;
         try
         {
-            Assessment = await Api.AssessAsync(id);
-            SetMessage(Assessment is null ? "No affordability result was returned." : "Affordability estimate loaded.", Assessment is null);
+            _assessment = await Api.AssessAsync(id);
+            SetMessage(_assessment is null ? "No affordability result was returned." : "Affordability estimate loaded.", _assessment is null);
         }
         catch (HttpRequestException ex)
         {
-            Assessment = null;
+            _assessment = null;
             SetMessage(ex.StatusCode switch
             {
                 System.Net.HttpStatusCode.NotFound => "No application was found with that ID.",
@@ -178,31 +190,38 @@
                 _ => ServiceError(ex)
             }, true);
         }
-        finally { IsBusy = false; }
+        finally
+        {
+            _isBusy = false;
+        }
     }
 
     private bool TryGetApplicationId(out Guid id)
     {
-        if (Guid.TryParse(ApplicationId, out id)) { Message = null; return true; }
+        if (Guid.TryParse(_applicationId, out id))
+        {
+            _message = null;
+            return true;
+        }
         SetMessage("Enter a valid application ID.", true);
         return false;
     }
 
     private void ShowValidationErrors(EditContext editContext)
     {
-        ValidationErrors = editContext.GetValidationMessages()
+        _validationErrors = editContext.GetValidationMessages()
             .Distinct(StringComparer.Ordinal)
             .ToList();
     }
 
-    private void DismissValidationErrors() => ValidationErrors.Clear();
+    private void DismissValidationErrors() => _validationErrors.Clear();
 
     private async Task CopyApplicationIdAsync()
     {
-        if (Application is null) return;
+        if (_application is null) return;
         try
         {
-            await JS.InvokeVoidAsync("navigator.clipboard.writeText", Application.Id.ToString());
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", _application.Id.ToString());
             SetMessage("Application ID copied.", false);
         }
         catch (JSException)
@@ -211,7 +230,11 @@
         }
     }
 
-    private void SetMessage(string message, bool isError) { Message = message; IsError = isError; }
+    private void SetMessage(string message, bool isError)
+    {
+        _message = message;
+        _isError = isError;
+    }
     private static string ServiceError(HttpRequestException exception) => exception.StatusCode switch
     {
         System.Net.HttpStatusCode.Unauthorized => "The application service could not authenticate this request. Check the API key configuration.",

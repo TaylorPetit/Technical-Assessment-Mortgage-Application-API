@@ -5,13 +5,13 @@ namespace MortgageApplicationApi.Services;
 
 public class MortgageApplicationService(
     IMortgageApplicationRepository repository,
-    AffordabilityAssessor affordabilityAssessor)
+    IAffordabilityAssessor affordabilityAssessor)
 {
     public async Task<MortgageApplication> CreateAsync(
         CreateMortgageApplicationRequest request,
         CancellationToken cancellationToken = default)
     {
-        var application = new MortgageApplication(
+        MortgageApplication application = new(
             Guid.NewGuid(),
             request.AnnualIncome,
             request.MonthlyExpenses,
@@ -29,7 +29,7 @@ public class MortgageApplicationService(
 
     public async Task<AffordabilityAssessment?> AssessAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var application = await repository.GetByIdAsync(id, cancellationToken);
+        MortgageApplication? application = await repository.GetByIdAsync(id, cancellationToken);
         return application is null ? null : affordabilityAssessor.Assess(application);
     }
 }

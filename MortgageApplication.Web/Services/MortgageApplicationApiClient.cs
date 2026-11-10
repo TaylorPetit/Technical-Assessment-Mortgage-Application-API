@@ -10,7 +10,7 @@ public class MortgageApplicationApiClient(HttpClient httpClient)
         CreateMortgageApplicationRequest request,
         CancellationToken cancellationToken = default)
     {
-        using var response = await httpClient.PostAsJsonAsync(
+        using HttpResponseMessage response = await httpClient.PostAsJsonAsync(
             "api/mortgage-applications", request, cancellationToken);
 
         if (response.StatusCode == HttpStatusCode.BadRequest)

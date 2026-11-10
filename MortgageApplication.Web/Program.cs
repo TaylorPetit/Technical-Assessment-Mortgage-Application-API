@@ -2,26 +2,26 @@ using MortgageApplication.Web.Components;
 using MortgageApplication.Web.Services;
 using Microsoft.AspNetCore.DataProtection;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddHttpClient<MortgageApplicationApiClient>(client =>
 {
-    var apiAddress = builder.Configuration["Api:BaseUrl"] ?? "http://localhost:5251/";
+    string apiAddress = builder.Configuration["Api:BaseUrl"] ?? "http://localhost:5251/";
     client.BaseAddress = new Uri(apiAddress.EndsWith('/') ? apiAddress : apiAddress + "/");
-    var apiKey = builder.Configuration["Api:ApiKey"];
+    string? apiKey = builder.Configuration["Api:ApiKey"];
     if (!string.IsNullOrWhiteSpace(apiKey))
     {
         client.DefaultRequestHeaders.Add("X-Api-Key", apiKey);
     }
 });
-var keyDirectory = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "keys");
+string keyDirectory = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "keys");
 Directory.CreateDirectory(keyDirectory);
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(keyDirectory));
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
 {

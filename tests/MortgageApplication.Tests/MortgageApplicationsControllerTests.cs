@@ -14,10 +14,10 @@ public class MortgageApplicationsControllerTests
     [Fact]
     public async Task Create_ReturnsCreatedLocationAndSavesApplication()
     {
-        var repository = new InMemoryMortgageApplicationRepository();
-        var service = new MortgageApplicationService(repository, new AffordabilityAssessor());
-        var controller = new MortgageApplicationsController(service, NullLogger<MortgageApplicationsController>.Instance);
-        var request = new CreateMortgageApplicationRequest
+        InMemoryMortgageApplicationRepository repository = new();
+        MortgageApplicationService service = new(repository, new AffordabilityAssessor());
+        MortgageApplicationsController controller = new(service, NullLogger<MortgageApplicationsController>.Instance);
+        CreateMortgageApplicationRequest request = new()
         {
             AnnualIncome = 100_000m,
             MonthlyExpenses = 1_200m,
@@ -26,10 +26,10 @@ public class MortgageApplicationsControllerTests
             TermYears = 25
         };
 
-        var action = await controller.Create(request, CancellationToken.None);
+        ActionResult<MortgageApplicationModel> action = await controller.Create(request, CancellationToken.None);
 
-        var result = Assert.IsType<CreatedAtActionResult>(action.Result);
-        var application = Assert.IsType<MortgageApplicationModel>(result.Value);
+        CreatedAtActionResult result = Assert.IsType<CreatedAtActionResult>(action.Result);
+        MortgageApplicationModel application = Assert.IsType<MortgageApplicationModel>(result.Value);
         Assert.Equal(nameof(MortgageApplicationsController.GetById), result.ActionName);
         Assert.Equal(application.Id, result.RouteValues!["id"]);
         Assert.Same(application, await repository.GetByIdAsync(application.Id));
@@ -38,21 +38,21 @@ public class MortgageApplicationsControllerTests
     [Fact]
     public async Task GetById_ReturnsApplicationWhenFound()
     {
-        var application = CreateApplication();
-        var controller = CreateController(new InMemoryMortgageApplicationRepository(application));
+        MortgageApplicationModel application = CreateApplication();
+        MortgageApplicationsController controller = CreateController(new InMemoryMortgageApplicationRepository(application));
 
-        var action = await controller.GetById(application.Id, CancellationToken.None);
+        ActionResult<MortgageApplicationModel> action = await controller.GetById(application.Id, CancellationToken.None);
 
-        var result = Assert.IsType<OkObjectResult>(action.Result);
+        OkObjectResult result = Assert.IsType<OkObjectResult>(action.Result);
         Assert.Same(application, result.Value);
     }
 
     [Fact]
     public async Task GetById_ReturnsNotFoundWhenMissing()
     {
-        var controller = CreateController(new InMemoryMortgageApplicationRepository());
+        MortgageApplicationsController controller = CreateController(new InMemoryMortgageApplicationRepository());
 
-        var action = await controller.GetById(Guid.NewGuid(), CancellationToken.None);
+        ActionResult<MortgageApplicationModel> action = await controller.GetById(Guid.NewGuid(), CancellationToken.None);
 
         Assert.IsType<NotFoundResult>(action.Result);
     }
@@ -60,22 +60,22 @@ public class MortgageApplicationsControllerTests
     [Fact]
     public async Task Assess_ReturnsAssessmentWhenApplicationExists()
     {
-        var application = CreateApplication();
-        var controller = CreateController(new InMemoryMortgageApplicationRepository(application));
+        MortgageApplicationModel application = CreateApplication();
+        MortgageApplicationsController controller = CreateController(new InMemoryMortgageApplicationRepository(application));
 
-        var action = await controller.Assess(application.Id, CancellationToken.None);
+        ActionResult<AffordabilityAssessment> action = await controller.Assess(application.Id, CancellationToken.None);
 
-        var result = Assert.IsType<OkObjectResult>(action.Result);
-        var assessment = Assert.IsType<AffordabilityAssessment>(result.Value);
+        OkObjectResult result = Assert.IsType<OkObjectResult>(action.Result);
+        AffordabilityAssessment assessment = Assert.IsType<AffordabilityAssessment>(result.Value);
         Assert.Equal(application.Id, assessment.ApplicationId);
     }
 
     [Fact]
     public async Task Assess_ReturnsNotFoundWhenApplicationIsMissing()
     {
-        var controller = CreateController(new InMemoryMortgageApplicationRepository());
+        MortgageApplicationsController controller = CreateController(new InMemoryMortgageApplicationRepository());
 
-        var action = await controller.Assess(Guid.NewGuid(), CancellationToken.None);
+        ActionResult<AffordabilityAssessment> action = await controller.Assess(Guid.NewGuid(), CancellationToken.None);
 
         Assert.IsType<NotFoundResult>(action.Result);
     }
@@ -83,14 +83,14 @@ public class MortgageApplicationsControllerTests
     [Fact]
     public async Task Assess_Returns422WhenDecimalCalculationOverflows()
     {
-        var application = CreateApplication(annualIncome: 0.01m, monthlyExpenses: decimal.MaxValue);
-        var controller = CreateController(new InMemoryMortgageApplicationRepository(application));
+        MortgageApplicationModel application = CreateApplication(annualIncome: 0.01m, monthlyExpenses: decimal.MaxValue);
+        MortgageApplicationsController controller = CreateController(new InMemoryMortgageApplicationRepository(application));
 
-        var action = await controller.Assess(application.Id, CancellationToken.None);
+        ActionResult<AffordabilityAssessment> action = await controller.Assess(application.Id, CancellationToken.None);
 
-        var result = Assert.IsType<ObjectResult>(action.Result);
+        ObjectResult result = Assert.IsType<ObjectResult>(action.Result);
         Assert.Equal(StatusCodes.Status422UnprocessableEntity, result.StatusCode);
-        var problem = Assert.IsType<ProblemDetails>(result.Value);
+        ProblemDetails problem = Assert.IsType<ProblemDetails>(result.Value);
         Assert.Equal("Affordability assessment cannot be calculated", problem.Title);
     }
 

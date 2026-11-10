@@ -10,12 +10,12 @@ public class JsonMortgageApplicationRepositoryTests
     [Fact]
     public async Task GetById_ReturnsNullWhenStoreDoesNotExist()
     {
-        var (directory, filePath) = CreateTemporaryStorePath();
+        (string directory, string filePath) = CreateTemporaryStorePath();
         try
         {
-            var repository = new JsonMortgageApplicationRepository(filePath);
+            JsonMortgageApplicationRepository repository = new(filePath);
 
-            var result = await repository.GetByIdAsync(Guid.NewGuid());
+            MortgageApplicationModel? result = await repository.GetByIdAsync(Guid.NewGuid());
 
             Assert.Null(result);
             Assert.False(File.Exists(filePath));
@@ -29,16 +29,16 @@ public class JsonMortgageApplicationRepositoryTests
     [Fact]
     public async Task AddAsync_PersistsApplicationForANewRepositoryInstance()
     {
-        var (directory, filePath) = CreateTemporaryStorePath();
+        (string directory, string filePath) = CreateTemporaryStorePath();
         try
         {
-            var application = CreateApplication();
-            var repository = new JsonMortgageApplicationRepository(filePath);
+            MortgageApplicationModel application = CreateApplication();
+            JsonMortgageApplicationRepository repository = new(filePath);
 
             await repository.AddAsync(application);
 
-            var json = await File.ReadAllTextAsync(filePath);
-            var reloadedApplication = await new JsonMortgageApplicationRepository(filePath)
+            string json = await File.ReadAllTextAsync(filePath);
+            MortgageApplicationModel? reloadedApplication = await new JsonMortgageApplicationRepository(filePath)
                 .GetByIdAsync(application.Id);
 
             Assert.Contains("\"annualIncome\"", json);
@@ -53,16 +53,16 @@ public class JsonMortgageApplicationRepositoryTests
     [Fact]
     public async Task AddAsync_PreservesAllApplicationsWhenWritesRunConcurrently()
     {
-        var (directory, filePath) = CreateTemporaryStorePath();
+        (string directory, string filePath) = CreateTemporaryStorePath();
         try
         {
-            var repository = new JsonMortgageApplicationRepository(filePath);
-            var applications = Enumerable.Range(0, 20).Select(_ => CreateApplication()).ToArray();
+            JsonMortgageApplicationRepository repository = new(filePath);
+            MortgageApplicationModel[] applications = Enumerable.Range(0, 20).Select(_ => CreateApplication()).ToArray();
 
             await Task.WhenAll(applications.Select(application => repository.AddAsync(application)));
 
-            var reloadedRepository = new JsonMortgageApplicationRepository(filePath);
-            foreach (var application in applications)
+            JsonMortgageApplicationRepository reloadedRepository = new(filePath);
+            foreach (MortgageApplicationModel application in applications)
             {
                 Assert.Equal(application, await reloadedRepository.GetByIdAsync(application.Id));
             }
@@ -76,12 +76,12 @@ public class JsonMortgageApplicationRepositoryTests
     [Fact]
     public async Task GetById_ThrowsWhenStoreContainsInvalidJson()
     {
-        var (directory, filePath) = CreateTemporaryStorePath();
+        (string directory, string filePath) = CreateTemporaryStorePath();
         try
         {
             Directory.CreateDirectory(directory);
             await File.WriteAllTextAsync(filePath, "not valid json");
-            var repository = new JsonMortgageApplicationRepository(filePath);
+            JsonMortgageApplicationRepository repository = new(filePath);
 
             await Assert.ThrowsAsync<JsonException>(() => repository.GetByIdAsync(Guid.NewGuid()));
         }
@@ -94,11 +94,11 @@ public class JsonMortgageApplicationRepositoryTests
     [Fact]
     public async Task AddAsync_RespectsCancellationBeforeWriting()
     {
-        var (directory, filePath) = CreateTemporaryStorePath();
+        (string directory, string filePath) = CreateTemporaryStorePath();
         try
         {
-            var repository = new JsonMortgageApplicationRepository(filePath);
-            using var cancellation = new CancellationTokenSource();
+            JsonMortgageApplicationRepository repository = new(filePath);
+            using CancellationTokenSource cancellation = new();
             await cancellation.CancelAsync();
 
             await Assert.ThrowsAnyAsync<OperationCanceledException>(
@@ -123,16 +123,16 @@ public class JsonMortgageApplicationRepositoryTests
 
     private static (string Directory, string FilePath) CreateTemporaryStorePath()
     {
-        var root = Path.Combine(AppContext.BaseDirectory, "RepositoryTestData");
-        var directory = Path.Combine(root, $"MortgageApplicationTests-{Guid.NewGuid():N}");
+        string root = Path.Combine(AppContext.BaseDirectory, "RepositoryTestData");
+        string directory = Path.Combine(root, $"MortgageApplicationTests-{Guid.NewGuid():N}");
         return (directory, Path.Combine(directory, "applications.json"));
     }
 
     private static void DeleteTemporaryDirectory(string directory)
     {
-        var testDataRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "RepositoryTestData"))
+        string testDataRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "RepositoryTestData"))
             + Path.DirectorySeparatorChar;
-        var fullPath = Path.GetFullPath(directory);
+        string fullPath = Path.GetFullPath(directory);
         if (!fullPath.StartsWith(testDataRoot, StringComparison.OrdinalIgnoreCase))
         {
             throw new InvalidOperationException("Refusing to remove a directory outside the repository test data folder.");

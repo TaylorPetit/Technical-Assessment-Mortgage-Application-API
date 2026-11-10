@@ -18,13 +18,13 @@ public class ApiKeyAuthenticationHandler(
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        if (!Request.Headers.TryGetValue(HeaderName, out var providedKey))
+        if (!Request.Headers.TryGetValue(HeaderName, out Microsoft.Extensions.Primitives.StringValues providedKey))
         {
             return Task.FromResult(AuthenticateResult.NoResult());
         }
 
-        var expectedBytes = Encoding.UTF8.GetBytes(Options.ApiKey ?? string.Empty);
-        var providedBytes = Encoding.UTF8.GetBytes(providedKey.ToString());
+        byte[] expectedBytes = Encoding.UTF8.GetBytes(Options.ApiKey ?? string.Empty);
+        byte[] providedBytes = Encoding.UTF8.GetBytes(providedKey.ToString());
         if (expectedBytes.Length == 0 ||
             !CryptographicOperations.FixedTimeEquals(expectedBytes, providedBytes))
         {
@@ -32,10 +32,10 @@ public class ApiKeyAuthenticationHandler(
             return Task.FromResult(AuthenticateResult.Fail("Invalid API key."));
         }
 
-        var identity = new ClaimsIdentity(
+        ClaimsIdentity identity = new(
             [new Claim(ClaimTypes.Name, "api-client")], SchemeName);
-        var principal = new ClaimsPrincipal(identity);
-        var ticket = new AuthenticationTicket(principal, SchemeName);
+        ClaimsPrincipal principal = new(identity);
+        AuthenticationTicket ticket = new(principal, SchemeName);
         return Task.FromResult(AuthenticateResult.Success(ticket));
     }
 
